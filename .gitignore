@@ -19,6 +19,9 @@ data/
 .DS_Store
 Thumbs.db
 
+# Uploaded photos
+uploads/photos/
+
 # Node (old frontend leftovers)
 node_modules/
 dist/
