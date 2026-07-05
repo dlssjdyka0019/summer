@@ -30,7 +30,7 @@ public class AuthService {
         User user = new User(req.username, encoder.encode(req.password), "user", req.phone);
         user = userRepo.save(user);
         String token = createToken(user);
-        return new LoginResponse(true, token, new UserInfo(user.getId(), user.getUsername(), user.getRole(), user.getPhone()));
+        return new LoginResponse(true, token, new UserInfo(user.getId(), user.getUsername(), user.getRole(), user.getPhone(), 0));
     }
 
     public LoginResponse login(LoginRequest req) {
@@ -40,7 +40,7 @@ public class AuthService {
             throw new RuntimeException("用户名或密码错误");
 
         String token = createToken(user);
-        return new LoginResponse(true, token, new UserInfo(user.getId(), user.getUsername(), user.getRole(), user.getPhone()));
+        return new LoginResponse(true, token, new UserInfo(user.getId(), user.getUsername(), user.getRole(), user.getPhone(), 0));
     }
 
     public TokenInfo authenticate(String token) {

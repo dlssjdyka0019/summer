@@ -23,6 +23,9 @@ public class User {
     @Column(length = 20)
     private String phone = "";
 
+    @Column(name = "electricity_cards")
+    private Integer electricityCards = 0;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -44,6 +47,8 @@ public class User {
     public void setRole(String role) { this.role = role; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
+    public Integer getElectricityCards() { return electricityCards; }
+    public void setElectricityCards(Integer electricityCards) { this.electricityCards = electricityCards; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

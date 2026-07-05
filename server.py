@@ -33,7 +33,7 @@ app.add_middleware(
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
-    "password": "root",
+    "password": "123456",
     "database": "charging",
     "charset": "utf8mb4",
     "cursorclass": pymysql.cursors.DictCursor,
@@ -67,19 +67,19 @@ def init_db():
             CREATE TABLE IF NOT EXISTS stations (
                 id VARCHAR(50) PRIMARY KEY,
                 name VARCHAR(200) NOT NULL,
-                address TEXT DEFAULT '',
+                address VARCHAR(500) DEFAULT '',
                 longitude DOUBLE DEFAULT 0,
                 latitude DOUBLE DEFAULT 0,
                 operator VARCHAR(100) DEFAULT '',
                 total_spots INT DEFAULT 0,
                 available_spots INT DEFAULT 0,
                 power DOUBLE DEFAULT 0,
-                charger_types TEXT DEFAULT '[]',
+                charger_types VARCHAR(500) DEFAULT '[]',
                 price DOUBLE DEFAULT 0,
                 open_hours VARCHAR(50) DEFAULT '00:00-24:00',
                 phone VARCHAR(30) DEFAULT '',
                 status VARCHAR(20) DEFAULT 'open',
-                description TEXT DEFAULT '',
+                description VARCHAR(1000) DEFAULT '',
                 created_at DATETIME DEFAULT NOW(),
                 updated_at DATETIME DEFAULT NOW()
             )
@@ -131,7 +131,7 @@ def init_db():
                 ("admin", f"{salt}:{pw}", "admin")
             )
             conn.commit()
-            print("✅ 默认管理员账号: admin / admin123")
+            print("[OK] 默认管理员账号: admin / admin123")
 
         # Insert demo data if no stations exist
         cursor.execute("SELECT COUNT(*) AS cnt FROM stations")
@@ -185,7 +185,7 @@ def insert_demo_data(conn):
                 cursor.execute("INSERT INTO piles (id,station_id,name,type,power,price,status) VALUES (%s,%s,%s,%s,%s,%s,%s)",
                              (p[0], sid, p[1], p[2], p[3], p[4], p[5]))
         conn.commit()
-        print("✅ 已初始化8个演示充电站")
+        print("[OK] 已初始化8个演示充电站")
     finally:
         cursor.close()
 
@@ -543,9 +543,9 @@ def stop_session(sid: str, request: Request):
 @app.on_event("startup")
 def startup():
     init_db()
-    print("🚀 服务启动: http://localhost:8000")
-    print("📋 API 文档: http://localhost:8000/docs")
-    print("🔑 管理员: admin / admin123")
+    print("[OK] 服务启动: http://localhost:8000")
+    print("[OK] API 文档: http://localhost:8000/docs")
+    print("[OK] 管理员: admin / admin123")
 
 if __name__ == "__main__":
     import uvicorn

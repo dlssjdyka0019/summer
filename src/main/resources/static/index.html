@@ -18,6 +18,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 .header button:hover{background:#f1f5f9}
 .header .btn-add{background:#16a34a;color:#fff;border-color:#16a34a;font-weight:600}
 .header .btn-add:hover{background:#15803d}
+.header .btn-import-pile{background:#1e40af;color:#fff;border-color:#1e40af;font-weight:600}
+.header .btn-import-pile:hover{background:#1e3a8a}
+.header .btn-photo-review{background:#7c3aed;color:#fff;border-color:#7c3aed;font-weight:600}
+.header .btn-photo-review:hover{background:#6d28d9}
 .main{display:flex;flex:1;overflow:hidden}
 .sidebar{width:380px;min-width:380px;background:#fff;border-right:1px solid #e2e8f0;display:flex;flex-direction:column}
 .sidebar-toolbar{padding:10px 14px;border-bottom:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px}
@@ -56,6 +60,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 .toast{position:fixed;top:16px;right:16px;z-index:10000;padding:10px 18px;border-radius:8px;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
 .toast-ok{background:#dcfce7;color:#166534}
 .toast-err{background:#fee2e2;color:#991b1b}
+.drop-zone{border:2px dashed #93c5fd;border-radius:12px;padding:40px 20px;text-align:center;transition:all .2s;cursor:pointer;background:#f8faff}
+.drop-zone:hover,.drop-zone.drag-over{border-color:#2563eb;background:#eff6ff}
+.drop-zone .dz-icon{font-size:48px;margin-bottom:12px}
+.drop-zone .dz-title{font-size:15px;font-weight:600;color:#1e40af;margin-bottom:6px}
+.drop-zone .dz-hint{font-size:12px;color:#64748b;margin-bottom:16px}
+.drop-zone .dz-formats{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.drop-zone .dz-format-tag{padding:4px 10px;background:#dbeafe;color:#1e40af;border-radius:20px;font-size:11px;font-weight:500}
+.import-preview{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-top:14px}
+.import-preview table{width:100%;font-size:12px;border-collapse:collapse}
+.import-preview th{text-align:left;padding:4px 8px;color:#166534;border-bottom:1px solid #bbf7d0}
+.import-preview td{padding:4px 8px;color:#14532d}
+.coord-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:14px}
+.coord-row .f-group{flex:1;margin-bottom:0}
+.btn-coord-add{padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap}
+.btn-coord-add:hover{background:#1d4ed8}
+.coord-list{background:#f8fafc;border-radius:8px;padding:10px;margin-top:8px;max-height:150px;overflow-y:auto}
+.coord-item{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:#fff;border:1px solid #e2e8f0;border-radius:6px;margin-bottom:4px;font-size:13px}
+.coord-item .coord-text{color:#475569}
+.coord-item .coord-del{color:#dc2626;cursor:pointer;padding:2px 6px;border:1px solid #fecaca;border-radius:4px;background:#fff;font-size:11px}
+.coord-item .coord-del:hover{background:#fee2e2}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7;transform:translateX(-50%) scale(1.05)}}
 .map-wrap.picking{cursor:crosshair}
 .map-wrap.picking #map{cursor:crosshair!important}
@@ -96,6 +120,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     <span class="spacer"></span>
     <button @click="adminExport">📥 导出</button>
     <button @click="triggerImport">📤 导入</button>
+    <button class="btn-import-pile" @click="openPileImport">📌 导入充电桩</button>
+    <button class="btn-photo-review" @click="openPhotoReview">🖼️ 照片审核 <span v-if="pendingPhotos.length" style="background:#dc2626;color:#fff;border-radius:50%;padding:1px 6px;font-size:11px;margin-left:4px">{{pendingPhotos.length}}</span></button>
+    <button @click="openAuditLog">📋 审核记录</button>
+    <button @click="openCodeGen">🎫 兑换码</button>
+    <button @click="openSendCards">📨 发送卡片</button>
+    <button @click="openBatchIssue">📦 批量发放</button>
     <button class="btn-add" @click="openAddForm">➕ 添加充电站</button>
     <button @click="doLogout" style="background:#f1f5f9">🚪 退出</button>
     <input type="file" accept=".json" style="display:none" ref="fileIn" @change="adminImport">
@@ -177,6 +207,195 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     </div>
   </div>
   <div class="toast" :class="toast.type==='err'?'toast-err':'toast-ok'" v-if="toast.text" style="top:68px">{{toast.text}}</div>
+
+  <!-- Import Pile Modal -->
+  <div class="modal-mask" v-if="showPileImport" @click.self="closePileImport">
+    <div class="modal" style="width:620px">
+      <div class="modal-head"><h2>📌 导入充电桩数据</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="closePileImport">✕</button></div>
+      <div class="modal-body">
+        <!-- Step 1: Manual coordinate entry -->
+        <div style="margin-bottom:18px">
+          <div style="font-size:14px;font-weight:600;color:#1e40af;margin-bottom:10px">📍 方式一：手动输入坐标</div>
+          <div class="coord-row">
+            <div class="f-group"><label style="font-size:11px;color:#64748b">经度 (Longitude)</label><input v-model="pileCoordLng" type="number" step="0.000001" placeholder="125.1036"></div>
+            <div class="f-group"><label style="font-size:11px;color:#64748b">纬度 (Latitude)</label><input v-model="pileCoordLat" type="number" step="0.000001" placeholder="46.5982"></div>
+            <button class="btn-coord-add" @click="addCoordToList">➕ 添加</button>
+          </div>
+          <div class="coord-list" v-if="pileCoordList.length>0">
+            <div class="coord-item" v-for="(c,i) in pileCoordList" :key="i">
+              <span class="coord-text">📍 ({{c.lng}}, {{c.lat}})</span>
+              <button class="coord-del" @click="pileCoordList.splice(i,1)">删除</button>
+            </div>
+          </div>
+          <div v-else style="text-align:center;padding:14px;color:#94a3b8;font-size:12px;background:#f8fafc;border-radius:8px;margin-top:8px">尚未添加坐标，添加后将在地图上标记位置</div>
+        </div>
+
+        <!-- Step 2: File drag & drop -->
+        <div style="border-top:2px solid #e2e8f0;padding-top:18px">
+          <div style="font-size:14px;font-weight:600;color:#1e40af;margin-bottom:10px">📁 方式二：拖入文件批量导入</div>
+          <div class="drop-zone"
+               :class="{'drag-over':pileDragOver}"
+               @click="triggerPileFile"
+               @dragover.prevent="pileDragOver=true"
+               @dragleave.prevent="pileDragOver=false"
+               @drop.prevent="handlePileDrop">
+            <div class="dz-icon">🗂️</div>
+            <div class="dz-title">{{pileDragOver?'释放文件开始导入':'点击或拖拽文件到这里'}}</div>
+            <div class="dz-hint">支持包含经纬度坐标的数据文件</div>
+            <div class="dz-formats">
+              <span class="dz-format-tag">📄 CSV</span>
+              <span class="dz-format-tag">📊 Excel (.xlsx)</span>
+              <span class="dz-format-tag">📋 JSON</span>
+              <span class="dz-format-tag">🗺️ GeoJSON</span>
+            </div>
+          </div>
+          <input type="file" accept=".csv,.xlsx,.json,.geojson" style="display:none" ref="pileFileIn" @change="handlePileFile">
+          <div v-if="pileFileName" style="margin-top:10px;font-size:13px;color:#16a34a;text-align:center">✅ 已选择：{{pileFileName}}</div>
+        </div>
+
+        <!-- Map preview -->
+        <div v-if="pileCoordList.length>0" class="import-preview">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px">🗺️ 待导入坐标预览（{{pileCoordList.length}}个点位）</div>
+          <table><thead><tr><th>#</th><th>经度</th><th>纬度</th><th>地图位置</th></tr></thead>
+            <tbody><tr v-for="(c,i) in pileCoordList" :key="i"><td>{{i+1}}</td><td>{{c.lng}}</td><td>{{c.lat}}</td><td><a :href="'https://map.baidu.com/search/'+c.lat+','+c.lng" target="_blank" style="color:#2563eb">查看地图 ↗</a></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button @click="closePileImport" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer">取消</button>
+        <button @click="showToast('充电桩导入功能开发中，敬请期待','err')" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">📥 开始导入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photo Review Modal (Admin) -->
+  <div class="modal-mask" v-if="showPhotoReview" @click.self="closePhotoReview">
+    <div class="modal" style="width:620px">
+      <div class="modal-head"><h2>🖼️ 照片审核</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="closePhotoReview">✕</button></div>
+      <div class="modal-body">
+        <!-- Default settings -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:12px;color:#64748b;font-weight:600">默认值：</span>
+          <span style="font-size:12px;color:#475569">数量</span>
+          <input v-model.number="defaultCardCount" type="number" min="1" max="100" style="width:55px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;text-align:center">
+          <span style="font-size:12px;color:#475569">张, 每张</span>
+          <input v-model.number="defaultCardAmount" type="number" min="1" max="1000" step="0.5" style="width:65px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;text-align:center">
+          <span style="font-size:12px;color:#475569">元</span>
+          <button @click="saveCardDefaults" style="padding:5px 12px;background:#f59e0b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">💾 保存默认</button>
+        </div>
+        <div v-if="pendingPhotos.length===0" style="text-align:center;padding:40px;color:#94a3b8">✅ 暂无待审核照片</div>
+        <div v-for="ph in pendingPhotos" :key="ph.id" style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px">
+          <img :src="'/photos/'+ph.filePath" style="width:100%;max-height:240px;object-fit:cover;display:block" @error="$event.target.style.display='none'">
+          <div style="padding:10px 14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div><strong>{{ph.stationName}}</strong><span style="font-size:12px;color:#64748b;margin-left:8px">👤 {{ph.username}}</span></div>
+              <span style="font-size:11px;color:#94a3b8">{{ph.createdAt}}</span>
+            </div>
+            <!-- Hints -->
+            <div v-if="ph.hints&&ph.hints.length" style="margin-bottom:8px">
+              <div v-for="h in ph.hints" :key="h" style="font-size:11px;color:#dc2626;background:#fef2f2;padding:4px 8px;border-radius:4px;margin-bottom:2px">{{h}}</div>
+            </div>
+            <!-- Card reward inputs per photo -->
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+              <span style="font-size:12px;color:#475569">奖励：</span>
+              <input v-model.number="reviewCardCounts[ph.id]" type="number" min="1" max="100" style="width:55px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;text-align:center">
+              <span style="font-size:12px;color:#475569">张 × 每张</span>
+              <input v-model.number="reviewCardAmounts[ph.id]" type="number" min="1" max="1000" step="0.5" style="width:65px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;text-align:center">
+              <span style="font-size:12px;color:#475569">元 = </span>
+              <span style="font-weight:700;color:#d97706">¥{{((reviewCardCounts[ph.id]||1)*(reviewCardAmounts[ph.id]||10)).toFixed(1)}}</span>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button @click="approvePhoto(ph.id)" style="flex:1;padding:8px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">✅ 通过</button>
+              <button @click="rejectPhoto(ph.id)" style="flex:1;padding:8px;background:#dc2626;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">❌ 驳回</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Log Modal -->
+  <div class="modal-mask" v-if="showAuditLog" @click.self="showAuditLog=false">
+    <div class="modal" style="width:700px;max-height:85vh">
+      <div class="modal-head"><h2>📋 照片审核记录</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showAuditLog=false">✕</button></div>
+      <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+        <div v-if="auditLog.length===0" style="text-align:center;padding:30px;color:#94a3b8">暂无审核记录</div>
+        <div v-for="log in auditLog" :key="log.photoId" style="border:1px solid #e2e8f0;border-radius:10px;padding:12px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <strong>{{log.stationName}}</strong>
+            <span style="font-size:11px;color:#94a3b8">{{log.approvedAt}}</span>
+          </div>
+          <div style="font-size:12px;color:#64748b;margin-bottom:6px">👤 {{log.username}} | 🎫 {{log.cardCount}}张×¥{{log.cardAmount}} | 有效:{{log.activeCards}} 追回:{{log.revokedCards}}</div>
+          <div v-for="c in log.cards" :key="c.id" style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;margin:4px 0;border-radius:6px" :style="c.status==='revoked'?'background:#f1f5f9;opacity:0.6':'background:#fffbeb'">
+            <div style="font-size:12px">
+              <span :style="c.status==='revoked'?'text-decoration:line-through;color:#94a3b8':''">¥{{c.amount}}</span>
+              <span v-if="c.status==='revoked'" style="color:#dc2626;font-size:10px;margin-left:4px">已追回</span>
+              <span style="color:#94a3b8;font-size:10px;margin-left:8px">{{c.id}}</span>
+            </div>
+            <button v-if="c.status==='active'" @click="revokeCard(c.id)" style="padding:2px 10px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">追回</button>
+          </div>
+          <button v-if="log.activeCards>0" @click="revokeByPhoto(log.photoId)" style="margin-top:6px;padding:4px 12px;background:#b91c1c;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">🗑 追回该照片全部有效卡片</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Codes Modal -->
+  <div class="modal-mask" v-if="showCodeGen" @click.self="showCodeGen=false">
+    <div class="modal modal-sm">
+      <div class="modal-head"><h2>🎫 制作兑换码</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showCodeGen=false">✕</button></div>
+      <div class="modal-body">
+        <div class="f-group"><label>兑换码数量</label><input v-model.number="genCount" type="number" min="1" max="100" placeholder="10"></div>
+        <div class="f-group"><label>每个金额（元）</label><input v-model.number="genAmount" type="number" min="1" max="1000" step="0.5" placeholder="10.00"></div>
+        <button @click="generateCodes" :disabled="genBusy" style="width:100%;padding:10px;background:#7c3aed;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px">{{genBusy?'生成中...':'🎫 生成兑换码'}}</button>
+        <div v-if="genResult.length>0" style="margin-top:14px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:10px;max-height:200px;overflow-y:auto">
+          <div style="font-size:12px;color:#6d28d9;font-weight:600;margin-bottom:6px">✅ 已生成 {{genResult.length}} 个兑换码（每个¥{{genAmount}}）</div>
+          <div v-for="c in genResult" :key="c" style="font-family:monospace;font-size:12px;padding:2px 0;color:#4c1d95;border-bottom:1px dashed #ddd6fe">{{c}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send Cards Modal -->
+  <div class="modal-mask" v-if="showSendCards" @click.self="showSendCards=false">
+    <div class="modal modal-sm">
+      <div class="modal-head"><h2>📨 向用户发放电费卡</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showSendCards=false">✕</button></div>
+      <div class="modal-body">
+        <div class="f-group"><label>目标用户名</label><input v-model="sendUsername" placeholder="请输入用户名"></div>
+        <div class="f-row"><div class="f-group"><label>数量</label><input v-model.number="sendCount" type="number" min="1" max="100"></div><div class="f-group"><label>每张金额</label><input v-model.number="sendAmount" type="number" min="1" max="1000" step="0.5"></div></div>
+        <button @click="doSendCards" :disabled="sendBusy" style="width:100%;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px">{{sendBusy?'发放中...':'📨 确认发放'}}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch Issue Modal -->
+  <div class="modal-mask" v-if="showBatchIssue" @click.self="showBatchIssue=false">
+    <div class="modal" style="width:550px">
+      <div class="modal-head"><h2>📦 批量发放电费卡</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showBatchIssue=false">✕</button></div>
+      <div class="modal-body">
+        <div style="font-size:14px;color:#64748b;margin-bottom:16px">上传 Excel/CSV 文件，按用户批量发放电费卡</div>
+        <div class="drop-zone" style="padding:40px" @click="triggerBatchFile" @dragover.prevent @drop.prevent>
+          <div class="dz-icon">📁</div><div class="dz-title">点击选择文件</div>
+          <div class="dz-hint">支持 .xlsx / .csv 格式</div>
+          <div class="dz-formats"><span class="dz-format-tag">📊 Excel</span><span class="dz-format-tag">📄 CSV</span></div>
+        </div>
+        <input type="file" accept=".xlsx,.csv" style="display:none" ref="batchFileIn" @change="handleBatchFile">
+        <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-top:14px;font-size:12px;color:#166534">
+          <strong>文件格式说明：</strong><br>
+          A列：用户名 | B列：电费卡金额（元）<br>
+          示例：<br>
+          <code>zhangsan, 10.00</code><br>
+          <code>lisi, 5.00</code>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button @click="showBatchIssue=false" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer">关闭</button>
+        <button @click="doBatchIssue" style="padding:8px 16px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">📤 开始发放</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" :class="toast.type==='err'?'toast-err':'toast-ok'" v-if="toast.text" style="top:68px">{{toast.text}}</div>
   </template>
 
   <!-- ============ USER VIEW ============ -->
@@ -184,6 +403,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <div class="header">
     <span class="logo">⚡ 充电服务</span>
     <span style="font-size:12px;color:#64748b">欢迎，{{currentUser?.username}}</span>
+    <span @click="openCardDetail" style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(245,158,11,.4)'" onmouseout="this.style.boxShadow='none'">⚡ 电费卡：{{currentUser?.electricityCards||0}}张</span>
     <span class="spacer"></span>
     <button @click="showSessions=!showSessions">📋 我的充电 <span v-if="activeSessions.length" style="background:#16a34a;color:#fff;border-radius:50%;padding:1px 6px;font-size:11px;margin-left:4px">{{activeSessions.length}}</span></button>
     <button @click="doLogout" style="background:#f1f5f9">🚪 退出</button>
@@ -220,6 +440,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
           <button v-if="p.status==='open'" @click="openPayModal(detailStation,p)" style="padding:6px 16px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px">⚡ 充电</button>
           <span v-else style="font-size:12px;color:#94a3b8">不可用</span>
         </div>
+        <!-- Photo Section -->
+        <div style="border-top:2px solid #e2e8f0;padding-top:14px;margin-top:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>📷 实景照片</strong>
+            <button @click="triggerPhotoUpload(detailStation)" style="padding:5px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">📤 上传照片</button>
+          </div>
+          <input type="file" accept="image/*" style="display:none" ref="photoFileIn" @change="handlePhotoUpload">
+          <div v-if="stationPhotos.length===0" style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">暂无实景照片，快来上传第一张吧！</div>
+          <div v-for="ph in stationPhotos" :key="ph.id" style="margin-bottom:10px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
+            <img :src="'/photos/'+ph.filePath" style="width:100%;max-height:260px;object-fit:cover;display:block" @error="$event.target.style.display='none'">
+            <div style="padding:8px 12px;font-size:11px;color:#64748b;background:#f8fafc;text-align:center">
+              照片由用户<span style="font-weight:600;color:#1e40af">{{ph.username}}</span>上传{{ph.reward?'，'+ph.reward:''}}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -240,6 +475,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       <div class="modal-foot"><button @click="showPay=false" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer">取消</button><button @click="confirmPay" :disabled="paying" style="padding:10px 24px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">{{paying?'处理中...':'✅ 确认支付'}}</button></div>
     </div>
   </div>
+  <!-- Card Detail Modal -->
+  <div class="modal-mask" v-if="showCards" @click.self="showCards=false">
+    <div class="modal" style="width:480px">
+      <div class="modal-head"><h2>⚡ 我的电费卡</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showCards=false">✕</button></div>
+      <div class="modal-body" style="max-height:400px;overflow-y:auto">
+        <!-- Redeem code -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;padding:10px;background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px">
+          <input v-model="redeemCode" placeholder="输入兑换码" style="flex:1;padding:8px 10px;border:1px solid #c4b5fd;border-radius:6px;font-size:13px;outline:none;text-transform:uppercase" @keyup.enter="doRedeem">
+          <button @click="doRedeem" :disabled="redeemBusy" style="padding:8px 16px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;white-space:nowrap;font-size:13px">{{redeemBusy?'...':'兑换'}}</button>
+        </div>
+        <div v-if="cardList.length===0" style="text-align:center;padding:30px;color:#94a3b8">
+          <div style="font-size:40px;margin-bottom:8px">🎫</div>
+          <div style="font-size:14px">还没有电费卡</div>
+          <div style="font-size:12px;margin-top:4px">上传充电站照片通过审核、或用兑换码兑换即可获得</div>
+        </div>
+        <div v-for="c in cardList" :key="c.id" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:8px;margin-bottom:8px" :style="c.status==='revoked'?'background:#f1f5f9;border:1px solid #cbd5e1;filter:grayscale(1);opacity:0.7':'background:#fffbeb;border:1px solid #fde68a'">
+          <div>
+            <div style="font-size:14px;font-weight:600" :style="c.status==='revoked'?'color:#94a3b8;text-decoration:line-through':'color:#92400e'">⚡ {{c.stationName||'奖励卡'}}</div>
+            <div style="font-size:10px;color:#94a3b8;margin-top:2px">🆔 {{c.id}}</div>
+            <div style="font-size:10px;color:#94a3b8">👤 审核员：{{c.adminName||'系统'}} · 🕐 {{c.createdAt}}</div>
+            <div v-if="c.status==='revoked'" style="font-size:10px;color:#dc2626;margin-top:2px">⚠️ 已被追回 · 无法使用</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:22px;font-weight:700" :style="c.status==='revoked'?'color:#94a3b8':'color:#d97706'">¥{{c.amount}}</div>
+            <button v-if="c.status==='revoked'" @click="deleteRevokedCard(c.id)" style="margin-top:4px;padding:2px 10px;background:#e2e8f0;color:#64748b;border:none;border-radius:4px;cursor:pointer;font-size:10px">🗑 删除</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" :class="toast.type==='err'?'toast-err':'toast-ok'" v-if="toast.text" style="top:68px">{{toast.text}}</div>
   </template>
 </div>
@@ -298,6 +564,14 @@ const app=createApp({setup(){
   const showStation=ref(false),detailStation=ref(null)
   const showPay=ref(false),payTarget=ref(null),payDur=ref(1),paying=ref(false)
   const showSessions=ref(false),toast=ref({text:'',type:'ok'}),fileIn=ref(null)
+  const showPileImport=ref(false),pileDragOver=ref(false),pileCoordLng=ref(''),pileCoordLat=ref(''),pileCoordList=ref([]),pileFileName=ref(''),pileFileIn=ref(null)
+  const stationPhotos=ref([]),pendingPhotos=ref([]),showPhotoReview=ref(false),photoFileIn=ref(null),photoUploading=ref(false),currentPhotoStationId=ref('')
+  const defaultCardCount=ref(1),defaultCardAmount=ref(10),reviewCardCounts=ref({}),reviewCardAmounts=ref({}),cardList=ref([]),showCards=ref(false)
+  // Audit log, codes, send cards, batch
+  const showAuditLog=ref(false),auditLog=ref([]),showCodeGen=ref(false),genCount=ref(10),genAmount=ref(10),genBusy=ref(false),genResult=ref([])
+  const showSendCards=ref(false),sendUsername=ref(''),sendCount=ref(1),sendAmount=ref(10),sendBusy=ref(false)
+  const showBatchIssue=ref(false),batchFileIn=ref(null)
+  const redeemCode=ref(''),redeemBusy=ref(false)
   const pileStatusText={open:'空闲',in_use:'使用中',maintenance:'维护中',closed:'已停用'}
 
   const form=ref({name:'',address:'',longitude:0,latitude:0,operator:'',totalSpots:0,availableSpots:0,power:0,chargerTypes:[],price:0,openHours:'00:00-24:00',phone:'',status:'open',desc:'',piles:[]})
@@ -341,6 +615,7 @@ const app=createApp({setup(){
     if(view.value==='admin'||view.value==='user'){
       stations.value=await api('/api/stations')
       if(view.value==='user')sessions.value=await api('/api/sessions')
+      if(view.value==='admin')loadPendingPhotos()
     }
   }
 
@@ -348,7 +623,7 @@ const app=createApp({setup(){
     setTimeout(()=>{
       if(!document.getElementById('map'))return
       if(!map)initMap();else map.invalidateSize()
-      if(stations.value.length)refreshMarkers(stations.value,{isAdmin:view.value==='admin',onClick:s=>{if(view.value==='admin')selectedId.value=s.id;else{detailStation.value=s;showStation.value=true}}})
+      if(stations.value.length)refreshMarkers(stations.value,{isAdmin:view.value==='admin',onClick:s=>{if(view.value==='admin')selectedId.value=s.id;else{detailStation.value=s;showStation.value=true;loadStationPhotos(s.id)}}})
       if(map&&view.value==='admin')map.on('click',e=>{if(picking.value){form.value.latitude=e.latlng.lat;form.value.longitude=e.latlng.lng;picking.value=false;showForm.value=true;showToast('已获取坐标')}})
     },300)
   }
@@ -358,6 +633,59 @@ const app=createApp({setup(){
   function openAddForm(){editingId.value=null;editingPile.value=null;form.value={name:'',address:'',longitude:0,latitude:0,operator:'',totalSpots:0,availableSpots:0,power:0,chargerTypes:[],price:0,openHours:'00:00-24:00',phone:'',status:'open',desc:'',piles:[]};showForm.value=false;picking.value=true;showToast('请在地图上点击选择位置')}
   function pickOnMap(){showForm.value=false;picking.value=true;showToast('请在地图上点击选择位置')}
   function closeForm(){showForm.value=false;editingId.value=null;editingPile.value=null;picking.value=false}
+  // ====== Import Pile ======
+  function openPileImport(){showPileImport.value=true;pileCoordList.value=[];pileCoordLng.value='';pileCoordLat.value='';pileFileName.value=''}
+  function closePileImport(){showPileImport.value=false;pileDragOver.value=false;pileFileName.value=''}
+  function addCoordToList(){if(pileCoordLng.value&&pileCoordLat.value){pileCoordList.value.push({lng:Number(pileCoordLng.value),lat:Number(pileCoordLat.value)});pileCoordLng.value='';pileCoordLat.value='';showToast('坐标已添加')}}
+  function triggerPileFile(){pileFileIn.value.click()}
+  function handlePileDrop(e){pileDragOver.value=false;const f=e.dataTransfer.files[0];if(f){pileFileName.value=f.name;showToast('文件已接收：'+f.name)}}
+  function handlePileFile(e){const f=e.target.files[0];if(f){pileFileName.value=f.name;showToast('文件已选择：'+f.name)}}
+  // ====== Photos ======
+  async function loadStationPhotos(sid){try{stationPhotos.value=await api('/api/stations/'+sid+'/photos')}catch(e){stationPhotos.value=[]}}
+  async function loadPendingPhotos(){try{pendingPhotos.value=await api('/api/admin/photos/pending');pendingPhotos.value.forEach(p=>{reviewCardCounts.value[p.id]=defaultCardCount.value;reviewCardAmounts.value[p.id]=defaultCardAmount.value})}catch(e){pendingPhotos.value=[]}}
+  function triggerPhotoUpload(station){currentPhotoStationId.value=station.id;photoFileIn.value.click()}
+  async function handlePhotoUpload(e){
+    const f=e.target.files[0];if(!f)return;photoUploading.value=true
+    try{
+      const fd=new FormData();fd.append('file',f)
+      const headers={};if(token.value)headers['Authorization']='Bearer '+token.value
+      const res=await fetch(API+'/api/stations/'+currentPhotoStationId.value+'/photos',{method:'POST',headers,body:fd})
+      const data=await res.json();if(!res.ok)throw new Error(data.detail||data.message||'上传失败')
+      showToast(data.message||'上传成功');await loadStationPhotos(currentPhotoStationId.value)
+    }catch(e){showToast(e.message,'err')}finally{photoUploading.value=false;photoFileIn.value.value=''}
+  }
+  async function openPhotoReview(){
+    showPhotoReview.value=true
+    try{const d=await api('/api/admin/card-defaults');defaultCardCount.value=d.defaultCardCount||1;defaultCardAmount.value=d.defaultCardAmount||10}catch(e){}
+    loadPendingPhotos()
+  }
+  function closePhotoReview(){showPhotoReview.value=false}
+  async function approvePhoto(pid){
+    const cnt=reviewCardCounts.value[pid]||defaultCardCount.value
+    const amt=reviewCardAmounts.value[pid]||defaultCardAmount.value
+    try{const res=await api('/api/admin/photos/'+pid+'/approve',{method:'PUT',body:{cardCount:cnt,cardAmount:amt}});showToast(res.message);loadPendingPhotos()}catch(e){showToast(e.message,'err')}
+  }
+  async function rejectPhoto(pid){try{await api('/api/admin/photos/'+pid+'/reject',{method:'PUT'});showToast('已驳回');loadPendingPhotos()}catch(e){showToast(e.message,'err')}}
+  async function saveCardDefaults(){try{await api('/api/admin/card-defaults',{method:'PUT',body:{defaultCardCount:defaultCardCount.value,defaultCardAmount:defaultCardAmount.value}});showToast('默认值已保存')}catch(e){showToast(e.message,'err')}}
+  async function openCardDetail(){showCards.value=true;try{const res=await api('/api/user/cards');cardList.value=res.cards||[]}catch(e){cardList.value=[]}}
+  // ====== Audit log ======
+  async function openAuditLog(){showAuditLog.value=true;try{auditLog.value=await api('/api/admin/cards/audit')}catch(e){auditLog.value=[]}}
+  async function revokeByPhoto(pid){if(!confirm('追回该照片发放的全部有效电费卡？'))return;try{await api('/api/admin/cards/revoke-by-photo/'+pid,{method:'PUT'});showToast('已追回');openAuditLog()}catch(e){showToast(e.message,'err')}}
+  async function revokeCard(cid){if(!confirm('追回该电费卡？'))return;try{await api('/api/admin/cards/'+cid+'/revoke',{method:'PUT'});showToast('已追回');openAuditLog()}catch(e){showToast(e.message,'err')}}
+  // ====== Codes ======
+  function openCodeGen(){showCodeGen.value=true;genResult.value=[];genCount.value=10;genAmount.value=10}
+  async function generateCodes(){genBusy.value=true;try{const res=await api('/api/admin/codes/generate',{method:'POST',body:{count:genCount.value,amount:genAmount.value}});genResult.value=res.codes||[];showToast(res.message)}catch(e){showToast(e.message,'err')}finally{genBusy.value=false}}
+  // ====== Send cards ======
+  function openSendCards(){showSendCards.value=true;sendUsername.value='';sendCount.value=1;sendAmount.value=10}
+  async function doSendCards(){if(!sendUsername.value){showToast('请输入用户名','err');return};sendBusy.value=true;try{const res=await api('/api/admin/cards/send',{method:'POST',body:{username:sendUsername.value,count:sendCount.value,amount:sendAmount.value}});showToast(res.message);showSendCards.value=false}catch(e){showToast(e.message,'err')}finally{sendBusy.value=false}}
+  // ====== Batch ======
+  function openBatchIssue(){showBatchIssue.value=true}
+  function triggerBatchFile(){batchFileIn.value.click()}
+  async function handleBatchFile(e){const f=e.target.files[0];if(f){showToast('文件已选择：'+f.name)}}
+  async function doBatchIssue(){try{const res=await api('/api/admin/cards/batch',{method:'POST'});showToast(res.message)}catch(e){showToast(e.message,'err')}}
+  // ====== Redeem ======
+  async function doRedeem(){if(!redeemCode.value){showToast('请输入兑换码','err');return};redeemBusy.value=true;try{const res=await api('/api/user/redeem',{method:'POST',body:{code:redeemCode.value}});showToast(res.message);redeemCode.value='';openCardDetail()}catch(e){showToast(e.message,'err')}finally{redeemBusy.value=false}}
+  async function deleteRevokedCard(cid){if(!confirm('确认删除该卡片？'))return;try{await api('/api/user/cards/'+cid,{method:'DELETE'});showToast('已删除');openCardDetail()}catch(e){showToast(e.message,'err')}}
   function selectStation(s){selectedId.value=s.id;flyTo(s)}
 
   async function saveStation(){
@@ -395,7 +723,7 @@ const app=createApp({setup(){
     try{const data=JSON.parse(await file.text());if(!Array.isArray(data))throw new Error('格式错误');for(const s of data){await api('/api/stations',{method:'POST',body:s})};await loadData();refreshMarkers(stations.value,{isAdmin:true,onClick:s=>{selectedId.value=s.id}});showToast('导入'+data.length+'个')}catch(e){showToast('导入失败:'+e.message,'err')};fileIn.value.value=''
   }
 
-  window._userView=function(id){const s=stations.value.find(x=>x.id===id);if(s){detailStation.value=s;showStation.value=true}}
+  window._userView=function(id){const s=stations.value.find(x=>x.id===id);if(s){detailStation.value=s;showStation.value=true;loadStationPhotos(id)}}
   function openPayModal(s,p){payTarget.value={stationId:s.id,stationName:s.name,pileId:p.id,pileName:p.name,pilePrice:p.price};payDur.value=1;showPay.value=true}
   async function confirmPay(){
     if(!payTarget.value)return;paying.value=true
@@ -409,7 +737,7 @@ const app=createApp({setup(){
   onMounted(()=>{})
   onUnmounted(()=>{if(map){map.remove();map=null};delete window._editStation;delete window._delStation;delete window._userView})
 
-  return{view,currentUser,loginTab,loginMode,loginUser,loginPass,loginPhone,loginErr,loading,doLogin,doLogout,stations,sessions,search,filterStatus,selectedId,filtered,activeSessions,showForm,editingId,picking,saving,form,editingPile,pileForm,showStation,detailStation,showPay,payTarget,payDur,paying,showSessions,toast,fileIn,pileStatusText,statusText,openAddForm,pickOnMap,closeForm,selectStation,saveStation,adminExport,triggerImport,adminImport,addPile,startEditPile,saveEditPile,cancelEditPile,removePile,openPayModal,confirmPay,stopSession}
+  return{view,currentUser,loginTab,loginMode,loginUser,loginPass,loginPhone,loginErr,loading,doLogin,doLogout,stations,sessions,search,filterStatus,selectedId,filtered,activeSessions,showForm,editingId,picking,saving,form,editingPile,pileForm,showStation,detailStation,showPay,payTarget,payDur,paying,showSessions,toast,fileIn,showPileImport,pileDragOver,pileCoordLng,pileCoordLat,pileCoordList,pileFileName,pileFileIn,stationPhotos,pendingPhotos,showPhotoReview,photoFileIn,photoUploading,currentPhotoStationId,defaultCardCount,defaultCardAmount,reviewCardCounts,reviewCardAmounts,cardList,showCards,showAuditLog,auditLog,showCodeGen,genCount,genAmount,genBusy,genResult,showSendCards,sendUsername,sendCount,sendAmount,sendBusy,showBatchIssue,batchFileIn,redeemCode,redeemBusy,pileStatusText,statusText,openAddForm,pickOnMap,closeForm,openPileImport,closePileImport,addCoordToList,triggerPileFile,handlePileDrop,handlePileFile,loadStationPhotos,triggerPhotoUpload,handlePhotoUpload,openPhotoReview,closePhotoReview,approvePhoto,rejectPhoto,saveCardDefaults,openCardDetail,openAuditLog,revokeByPhoto,revokeCard,openCodeGen,generateCodes,openSendCards,doSendCards,openBatchIssue,triggerBatchFile,handleBatchFile,doBatchIssue,doRedeem,deleteRevokedCard,selectStation,saveStation,adminExport,triggerImport,adminImport,addPile,startEditPile,saveEditPile,cancelEditPile,removePile,openPayModal,confirmPay,stopSession}
 }})
 app.mount('#app')
 </script>
