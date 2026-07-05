@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>测试</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #f8fafc; }
+    .ok { color: green; font-size: 24px; font-weight: bold; }
+    .err { color: red; font-size: 18px; background: #fee; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h1>测试页面</h1>
+  <div id="app">
+    <p>Vue 加载中...</p>
+  </div>
+
+  <script type="module">
+    // Test 1: Can we load Vue?
+    import { createApp, ref } from '/node_modules/vue/dist/vue.esm-browser.js'
+    document.getElementById('app').innerHTML = '<p class="ok">✅ Vue 加载成功</p>'
+
+    // Test 2: Can we load Leaflet?
+    try {
+      const L = await import('/node_modules/leaflet/dist/leaflet-src.esm.js')
+      document.getElementById('app').innerHTML += '<p class="ok">✅ Leaflet JS 加载成功</p>'
+    } catch(e) {
+      document.getElementById('app').innerHTML += '<p class="err">❌ Leaflet 加载失败: ' + e.message + '</p>'
+    }
+
+    // Test 3: Can we load Leaflet CSS?
+    try {
+      await import('/node_modules/leaflet/dist/leaflet.css')
+      document.getElementById('app').innerHTML += '<p class="ok">✅ Leaflet CSS 加载成功</p>'
+    } catch(e) {
+      document.getElementById('app').innerHTML += '<p class="err">❌ Leaflet CSS 加载失败: ' + e.message + '</p>'
+    }
+
+    // Test 4: Create a map
+    try {
+      const L2 = await import('/node_modules/leaflet/dist/leaflet-src.esm.js')
+      const div = document.createElement('div')
+      div.style.width = '400px'
+      div.style.height = '300px'
+      div.style.border = '2px solid green'
+      document.body.appendChild(div)
+      const map = L2.default.map(div).setView([46.5892, 125.0036], 12)
+      L2.default.tileLayer('https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+        maxZoom: 18
+      }).addTo(map)
+      document.getElementById('app').innerHTML += '<p class="ok">✅ 地图创建成功，下方应显示地图</p>'
+    } catch(e) {
+      document.getElementById('app').innerHTML += '<p class="err">❌ 地图创建失败: ' + e.message + '</p>'
+    }
+  </script>
+</body>
+</html>
