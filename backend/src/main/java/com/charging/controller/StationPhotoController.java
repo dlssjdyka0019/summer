@@ -65,6 +65,24 @@ public class StationPhotoController {
         return photoService.rejectPhoto(pid);
     }
 
+    /** Admin: get all photos for a station (including hidden) */
+    @GetMapping("/admin/stations/{sid}/photos")
+    public List<Map<String, Object>> getAllStationPhotos(@PathVariable String sid,
+                                                          @RequestHeader("Authorization") String auth) {
+        authService.requireAdmin(auth.replace("Bearer ", ""));
+        return photoService.getAllApprovedPhotos(sid);
+    }
+
+    /** Admin: toggle photo visibility */
+    @PutMapping("/admin/photos/{pid}/visibility")
+    public Map<String, Object> toggleVisibility(@PathVariable String pid,
+                                                 @RequestBody Map<String, Boolean> body,
+                                                 @RequestHeader("Authorization") String auth) {
+        authService.requireAdmin(auth.replace("Bearer ", ""));
+        boolean visible = body.getOrDefault("visible", true);
+        return photoService.togglePhotoVisibility(pid, visible);
+    }
+
     /** Admin: get/set default reward config */
     @GetMapping("/admin/card-defaults")
     public Map<String, Object> getDefaultConfig(@RequestHeader("Authorization") String auth) {

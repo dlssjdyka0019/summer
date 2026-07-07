@@ -83,31 +83,62 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7;transform:translateX(-50%) scale(1.05)}}
 .map-wrap.picking{cursor:crosshair}
 .map-wrap.picking #map{cursor:crosshair!important}
+/* Login page */
+.login-bg{height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#022c22 0%,#064e3b 25%,#065f46 50%,#047857 75%,#059669 100%);position:relative;overflow:hidden}
+.login-bg::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(52,211,153,.15) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(52,211,153,.1) 0%,transparent 50%),radial-gradient(ellipse at 50% 80%,rgba(16,185,129,.12) 0%,transparent 50%)}
+.login-card{text-align:center;width:420px;max-width:92vw;position:relative;z-index:1;animation:loginIn .5s ease-out}
+@keyframes loginIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.login-icon{width:72px;height:72px;background:rgba(255,255,255,.12);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:16px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15)}
+.login-title{font-size:clamp(22px,4vw,30px);font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-.5px}
+.login-sub{color:rgba(255,255,255,.65);margin-bottom:24px;font-size:clamp(13px,2vw,15px)}
+.login-tabs{display:flex;margin-bottom:18px;background:rgba(255,255,255,.1);border-radius:12px;padding:4px;backdrop-filter:blur(8px)}
+.login-tab{flex:1;padding:10px 8px;cursor:pointer;font-weight:600;font-size:14px;transition:all .25s;border-radius:10px;color:rgba(255,255,255,.7)}
+.login-tab.active-tab{background:#fff;color:#065f46;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.login-box{background:rgba(255,255,255,.95);padding:clamp(18px,3vw,28px);border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.2);text-align:left;backdrop-filter:blur(12px)}
+.login-box .f-group label{color:#374151}
+.login-box .f-group input{background:#f9fafb;border-color:#d1d5db;padding:10px 12px;font-size:14px}
+.login-box .f-group input:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(5,150,105,.1)}
+.login-btn{width:100%;padding:12px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:15px;font-weight:700;transition:all .2s;letter-spacing:.5px}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(5,150,105,.35)}
+.login-btn:disabled{opacity:.6;transform:none;box-shadow:none}
+.login-link{font-size:12px;color:#6b7280;margin-bottom:12px;text-align:right}
+.login-link a{color:#059669;text-decoration:none;font-weight:600}
+.login-link a:hover{text-decoration:underline}
+.login-divider{border-top:1px solid #e5e7eb;margin-top:14px;padding-top:14px;display:flex;gap:8px}
+.login-quick{flex:1;padding:8px 6px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;color:#374151}
+.login-quick:hover{background:#e5e7eb;border-color:#d1d5db}
+.login-err{background:#fef2f2;color:#dc2626;font-size:13px;text-align:center;margin-top:10px;padding:8px;border-radius:8px;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@media(max-width:480px){.login-card{max-width:100vw}.login-box{border-radius:12px}.login-tabs{margin-bottom:12px}.login-tab{font-size:13px;padding:8px}}
 @media(max-width:768px){.main{flex-direction:column}.sidebar{width:100%;min-width:100%;max-height:40%}.map-wrap{height:60%}}
 </style>
 </head>
 <body>
 <div id="app">
   <!-- ============ LOGIN ============ -->
-  <div v-if="view==='login'" style="height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0fdf4,#dcfce7,#bbf7d0)">
-    <div style="text-align:center;width:420px;max-width:90vw;">
-      <div style="font-size:48px;margin-bottom:8px">⚡</div>
-      <h1 style="font-size:28px;font-weight:700;color:#166534;margin-bottom:4px">充电站管理平台</h1>
-      <p style="color:#64748b;margin-bottom:28px;font-size:14px">新能源汽车充电服务</p>
-      <div style="display:flex;margin-bottom:20px;background:#fff;border-radius:10px;overflow:hidden">
-        <div @click="loginTab='user';loginUser='';loginPass='';loginErr=''" style="flex:1;padding:12px;cursor:pointer;font-weight:600;font-size:14px;transition:all .2s" :style="loginTab==='user'?{background:'#16a34a',color:'#fff'}:{background:'#fff',color:'#64748b'}">👤 用户</div>
-        <div @click="loginTab='admin';loginUser='';loginPass='';loginErr=''" style="flex:1;padding:12px;cursor:pointer;font-weight:600;font-size:14px;transition:all .2s" :style="loginTab==='admin'?{background:'#16a34a',color:'#fff'}:{background:'#fff',color:'#64748b'}">🔧 管理员</div>
+  <div v-if="view==='login'" class="login-bg">
+    <div class="login-card">
+      <div class="login-icon">⚡</div>
+      <h1 class="login-title">充电站管理平台</h1>
+      <p class="login-sub">新能源汽车充电服务 · 大庆市</p>
+      <div class="login-tabs">
+        <div class="login-tab" :class="{'active-tab':loginTab==='user'}" @click="loginTab='user';loginUser='';loginPass='';loginErr=''">👤 用户</div>
+        <div class="login-tab" :class="{'active-tab':loginTab==='admin'}" @click="loginTab='admin';loginUser='';loginPass='';loginErr=''">🔧 管理员</div>
       </div>
-      <div style="background:#fff;padding:24px;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08);text-align:left">
+      <div class="login-box">
         <div class="f-group"><label>用户名</label><input v-model="loginUser" placeholder="请输入用户名" @keyup.enter="doLogin"></div>
         <div class="f-group"><label>密码</label><input v-model="loginPass" type="password" placeholder="请输入密码" @keyup.enter="doLogin"></div>
         <div class="f-group" v-if="loginTab==='user'&&loginMode==='register'"><label>手机号（选填）</label><input v-model="loginPhone" placeholder="请输入手机号"></div>
-        <div v-if="loginTab==='user'" style="font-size:12px;color:#64748b;margin-bottom:12px;text-align:right">
-          <span v-if="loginMode==='login'">没有账号？<a href="#" @click.prevent="loginMode='register';loginUser='';loginPass='';loginErr=''" style="color:#16a34a">立即注册</a></span>
-          <span v-else>已有账号？<a href="#" @click.prevent="loginMode='login';loginUser='';loginPass='';loginErr=''" style="color:#16a34a">去登录</a></span>
+        <div v-if="loginTab==='user'" class="login-link">
+          <span v-if="loginMode==='login'">没有账号？<a href="#" @click.prevent="loginMode='register';loginUser='';loginPass='';loginErr=''">立即注册</a></span>
+          <span v-else>已有账号？<a href="#" @click.prevent="loginMode='login';loginUser='';loginPass='';loginErr=''">去登录</a></span>
         </div>
-        <button @click="doLogin" :disabled="loading" style="width:100%;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;font-weight:600">{{loading?'处理中...':(loginTab==='user'&&loginMode==='register'?'注 册':'登 录')}}</button>
-        <div v-if="loginErr" style="color:#dc2626;font-size:13px;text-align:center;margin-top:8px">{{loginErr}}</div>
+        <button class="login-btn" @click="doLogin" :disabled="loading">{{loading?'处理中...':(loginTab==='user'&&loginMode==='register'?'注 册':'登 录')}}</button>
+        <div class="login-err" v-if="loginErr">{{loginErr}}</div>
+        <div class="login-divider">
+          <button class="login-quick" @click="quickLogin('admin','admin123')">🔧 测试管理员</button>
+          <button class="login-quick" @click="quickLogin('1111','1111')">👤 测试用户</button>
+        </div>
       </div>
     </div>
   </div>
@@ -118,6 +149,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     <span class="logo">⚡ 充电站管理</span>
     <span style="font-size:12px;color:#64748b">管理员：{{currentUser?.username}}</span>
     <span class="spacer"></span>
+    <button @click="syncSimToMapCenter" style="background:#dbeafe;color:#1e40af;border-color:#93c5fd;font-weight:600">📍 模拟定位</button>
     <button @click="adminExport">📥 导出</button>
     <button @click="triggerImport">📤 导入</button>
     <button class="btn-import-pile" @click="openPileImport">📌 导入充电桩</button>
@@ -151,58 +183,88 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       <div v-if="picking" style="position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:1000;background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;font-size:15px;font-weight:600;box-shadow:0 4px 20px rgba(22,163,74,.4);animation:pulse 1.5s infinite;pointer-events:none">👆 请在地图上点击选择位置</div>
     </div>
   </div>
-  <!-- Admin Form Modal -->
-  <div class="modal-mask" v-if="showForm" @click.self="closeForm">
+  <!-- Unified Admin Station Modal (view + edit + photos) -->
+  <div class="modal-mask" v-if="showAdminDetail" @click.self="closeAdminDetail">
     <div class="modal">
-      <div class="modal-head"><h2>{{editingId?'编辑':'添加'}}充电站</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="closeForm">✕</button></div>
-      <div class="modal-body">
-        <div v-if="!editingId" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:14px">
-          <div style="font-size:13px;font-weight:600;color:#475569;margin-bottom:8px">📍 位置</div>
-          <div class="f-row"><div class="f-group"><label style="font-size:11px;color:#64748b">经度</label><input v-model.number="form.longitude" type="number" step="0.000001" placeholder="125.1036"></div><div class="f-group"><label style="font-size:11px;color:#64748b">纬度</label><input v-model.number="form.latitude" type="number" step="0.000001" placeholder="46.5982"></div></div>
-          <button @click="pickOnMap" style="width:100%;padding:7px;border:1px dashed #16a34a;border-radius:5px;background:#f0fdf4;color:#16a34a;cursor:pointer;font-size:12px">👆 或点击地图获取坐标</button>
-        </div>
-        <div class="f-group"><label>名称 *</label><input v-model="form.name" placeholder="充电站名称"></div>
-        <div class="f-group"><label>地址</label><input v-model="form.address" placeholder="详细地址"></div>
-        <div class="f-row"><div class="f-group"><label>运营商</label><input v-model="form.operator"></div><div class="f-group"><label>状态</label><select v-model="form.status"><option value="open">✅ 营业中</option><option value="closed">❌ 已关闭</option><option value="maintenance">🔧 维护中</option></select></div></div>
-        <div class="f-row"><div class="f-group"><label>营业时间</label><input v-model="form.openHours" placeholder="00:00-24:00"></div><div class="f-group"><label>电话</label><input v-model="form.phone"></div></div>
-        <div class="f-group"><label>备注</label><textarea v-model="form.desc" placeholder="备注信息"></textarea></div>
-        <!-- Piles -->
-        <div style="border-top:2px solid #e2e8f0;padding-top:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><strong style="font-size:15px">🔌 充电桩</strong><span style="font-size:12px;color:#64748b">{{form.piles.length}}个</span></div>
-          <div v-if="form.piles.length>0" style="margin-bottom:12px">
-            <div v-for="p in form.piles" :key="p.id" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border-radius:6px;margin-bottom:6px;font-size:13px">
-              <template v-if="editingPile===p.id">
-                <input v-model="pileForm.name" style="width:60px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
-                <select v-model="pileForm.type" style="width:68px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option>快充</option><option>慢充</option><option>超快充</option><option>特斯拉</option></select>
-                <input v-model.number="pileForm.power" type="number" placeholder="kW" style="width:50px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
-                <input v-model.number="pileForm.price" type="number" step="0.01" placeholder="¥" style="width:60px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
-                <select v-model="pileForm.status" style="width:68px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option value="open">空闲</option><option value="in_use">使用中</option><option value="maintenance">维护中</option><option value="closed">停用</option></select>
-                <button @click="saveEditPile" style="padding:3px 8px;background:#16a34a;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:11px">✓</button>
-                <button @click="cancelEditPile" style="padding:3px 8px;background:#94a3b8;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:11px">✕</button>
-              </template>
-              <template v-else>
-                <span style="font-weight:600;min-width:55px">{{p.name}}</span><span class="tag">{{p.type}}</span>
-                <span style="color:#64748b">{{p.power}}kW ¥{{p.price}}/度</span>
-                <span class="badge" :class="p.status==='open'?'badge-open':p.status==='in_use'?'badge-maint':'badge-closed'" style="font-size:10px">{{pileStatusText[p.status]}}</span>
-                <span style="flex:1"></span>
-                <button @click="startEditPile(p)" style="padding:3px 8px;border:1px solid #e2e8f0;background:#fff;border-radius:3px;cursor:pointer;font-size:11px">✏️</button>
-                <button @click="removePile(p.id)" style="padding:3px 8px;border:1px solid #fee2e2;color:#dc2626;background:#fff;border-radius:3px;cursor:pointer;font-size:11px">🗑</button>
-              </template>
+      <div class="modal-head">
+        <h2>{{adminEditing?'编辑':''}} {{adminDetailStation?.name||'充电站'}}</h2>
+        <button style="border:none;background:none;cursor:pointer;font-size:18px" @click="closeAdminDetail">✕</button>
+      </div>
+      <div class="modal-body" v-if="adminDetailStation">
+        <!-- Edit mode: show form fields -->
+        <template v-if="adminEditing">
+          <div class="f-group"><label>名称 *</label><input v-model="adminEditForm.name" placeholder="充电站名称"></div>
+          <div class="f-group"><label>地址</label><input v-model="adminEditForm.address" placeholder="详细地址"></div>
+          <div class="f-row"><div class="f-group"><label>运营商</label><input v-model="adminEditForm.operator"></div><div class="f-group"><label>状态</label><select v-model="adminEditForm.status"><option value="open">✅ 营业中</option><option value="closed">❌ 已关闭</option><option value="maintenance">🔧 维护中</option></select></div></div>
+          <div class="f-row"><div class="f-group"><label>营业时间</label><input v-model="adminEditForm.openHours" placeholder="00:00-24:00"></div><div class="f-group"><label>电话</label><input v-model="adminEditForm.phone"></div></div>
+          <div class="f-group"><label>备注</label><textarea v-model="adminEditForm.desc" placeholder="备注信息"></textarea></div>
+          <!-- Piles editor -->
+          <div style="border-top:2px solid #e2e8f0;padding-top:16px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><strong style="font-size:15px">🔌 充电桩</strong><span style="font-size:12px;color:#64748b">{{adminEditForm.piles.length}}个</span></div>
+            <div v-if="adminEditForm.piles.length>0" style="margin-bottom:12px">
+              <div v-for="p in adminEditForm.piles" :key="p.id" style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#f8fafc;border-radius:6px;margin-bottom:6px;font-size:13px">
+                <template v-if="editingPile===p.id">
+                  <input v-model="pileForm.name" style="width:60px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
+                  <select v-model="pileForm.type" style="width:68px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option>快充</option><option>慢充</option><option>超快充</option><option>特斯拉</option></select>
+                  <input v-model.number="pileForm.power" type="number" placeholder="kW" style="width:50px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
+                  <input v-model.number="pileForm.price" type="number" step="0.01" placeholder="¥" style="width:60px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
+                  <select v-model="pileForm.status" style="width:68px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option value="open">空闲</option><option value="in_use">使用中</option><option value="maintenance">维护中</option><option value="closed">停用</option></select>
+                  <button @click="saveEditPile" style="padding:3px 8px;background:#16a34a;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:11px">✓</button>
+                  <button @click="cancelEditPile" style="padding:3px 8px;background:#94a3b8;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:11px">✕</button>
+                </template>
+                <template v-else>
+                  <span style="font-weight:600;min-width:55px">{{p.name}}</span><span class="tag">{{p.type}}</span>
+                  <span style="color:#64748b">{{p.power}}kW ¥{{p.price}}/度</span>
+                  <span class="badge" :class="p.status==='open'?'badge-open':p.status==='in_use'?'badge-maint':'badge-closed'" style="font-size:10px">{{pileStatusText[p.status]}}</span>
+                  <span style="flex:1"></span>
+                  <button @click="startEditPile(p)" style="padding:3px 8px;border:1px solid #e2e8f0;background:#fff;border-radius:3px;cursor:pointer;font-size:11px">✏️</button>
+                  <button @click="removePileFromAdmin(p.id)" style="padding:3px 8px;border:1px solid #fee2e2;color:#dc2626;background:#fff;border-radius:3px;cursor:pointer;font-size:11px">🗑</button>
+                </template>
+              </div>
+            </div>
+            <div v-if="editingPile===null" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 10px;background:#f0fdf4;border-radius:6px">
+              <input v-model="pileForm.name" placeholder="名称" style="width:65px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
+              <select v-model="pileForm.type" style="width:70px;padding:5px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option>快充</option><option>慢充</option><option>超快充</option><option>特斯拉</option></select>
+              <input v-model.number="pileForm.power" type="number" placeholder="kW" style="width:55px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
+              <input v-model.number="pileForm.price" type="number" step="0.01" placeholder="¥/度" style="width:65px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
+              <select v-model="pileForm.status" style="width:68px;padding:5px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option value="open">空闲</option><option value="in_use">使用中</option><option value="maintenance">维护中</option><option value="closed">停用</option></select>
+              <button @click="addPileToAdmin" style="padding:5px 14px;background:#16a34a;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">➕ 添加</button>
             </div>
           </div>
-          <div v-if="editingPile===null" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 10px;background:#f0fdf4;border-radius:6px">
-            <input v-model="pileForm.name" placeholder="名称" style="width:65px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
-            <select v-model="pileForm.type" style="width:70px;padding:5px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option>快充</option><option>慢充</option><option>超快充</option><option>特斯拉</option></select>
-            <input v-model.number="pileForm.power" type="number" placeholder="kW" style="width:55px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
-            <input v-model.number="pileForm.price" type="number" step="0.01" placeholder="¥/度" style="width:65px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px">
-            <select v-model="pileForm.status" style="width:68px;padding:5px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px"><option value="open">空闲</option><option value="in_use">使用中</option><option value="maintenance">维护中</option><option value="closed">停用</option></select>
-            <button @click="addPile" style="padding:5px 14px;background:#16a34a;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">➕ 添加</button>
+        </template>
+        <!-- View mode: show info + photos -->
+        <template v-else>
+          <p style="color:#64748b;margin-bottom:6px">📍 {{adminDetailStation.address||'未填写'}} | 🏢 {{adminDetailStation.operator||'未知'}} | 🕐 {{adminDetailStation.openHours||'00:00-24:00'}}</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <span class="badge" :class="adminDetailStation.status==='open'?'badge-open':adminDetailStation.status==='maintenance'?'badge-maint':'badge-closed'">{{statusText(adminDetailStation.status)}}</span>
+            <span style="font-size:12px;color:#64748b">🔌 {{(adminDetailStation.piles||[]).length}}桩 | 🅿️ {{adminDetailStation.availableSpots}}/{{adminDetailStation.totalSpots}}空位</span>
           </div>
-        </div>
+          <!-- Photos -->
+          <div style="border-top:2px solid #e2e8f0;padding-top:14px">
+            <strong style="font-size:14px">📷 实景照片</strong>
+            <div v-if="adminStationPhotos.length===0" style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">暂无照片</div>
+            <div v-for="ph in adminStationPhotos" :key="ph.id" style="margin-top:10px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden" :style="ph.visible===false?'opacity:0.4;filter:grayscale(0.5)':''">
+              <img :src="'/photos/'+ph.filePath" style="width:100%;max-height:240px;object-fit:cover;display:block" @error="$event.target.style.display='none'">
+              <div style="padding:6px 10px;font-size:11px;background:#f8fafc;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">
+                <span style="color:#64748b">照片由<span style="font-weight:600;color:#1e40af">{{ph.username}}</span>上传 · {{ph.createdAt}}</span>
+                <div style="display:flex;gap:4px">
+                  <button @click="togglePhotoHide(ph)" style="padding:2px 10px;border:1px solid #e2e8f0;background:#fff;border-radius:4px;cursor:pointer;font-size:11px">{{ph.visible===false?'👁 显示':'🙈 隐藏'}}</button>
+                  <button @click="revokePhotoCards(ph.id)" style="padding:2px 10px;border:1px solid #fecaca;color:#dc2626;background:#fff;border-radius:4px;cursor:pointer;font-size:11px">💸 追回</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
       <div class="modal-foot">
-        <button @click="closeForm" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer">取消</button>
-        <button @click="saveStation" :disabled="!form.name||saving" style="padding:8px 16px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">{{saving?'保存中...':'保存'}}</button>
+        <template v-if="adminEditing">
+          <button @click="cancelAdminEdit" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer">取消编辑</button>
+          <button @click="saveAdminEdit" :disabled="!adminEditForm.name||saving" style="padding:8px 16px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">{{saving?'保存中...':'💾 保存'}}</button>
+        </template>
+        <template v-else>
+          <button @click="deleteAdminStation" style="padding:8px 16px;border:1px solid #fee2e2;color:#dc2626;background:#fff;border-radius:6px;cursor:pointer">🗑 删除</button>
+          <button @click="startAdminEdit" style="padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">✏️ 编辑</button>
+        </template>
       </div>
     </div>
   </div>
@@ -395,6 +457,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     </div>
   </div>
 
+  <!-- Add Station Modal (new stations only) -->
+  <div class="modal-mask" v-if="showForm" @click.self="closeForm">
+    <div class="modal">
+      <div class="modal-head"><h2>➕ 添加充电站</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="closeForm">✕</button></div>
+      <div class="modal-body">
+        <div class="f-group"><label>名称 *</label><input v-model="form.name" placeholder="充电站名称"></div>
+        <div class="f-group"><label>地址</label><input v-model="form.address" placeholder="详细地址"></div>
+        <div class="f-row"><div class="f-group"><label>经度</label><input v-model.number="form.longitude" type="number" step="0.000001" placeholder="125.1036"></div><div class="f-group"><label>纬度</label><input v-model.number="form.latitude" type="number" step="0.000001" placeholder="46.5982"></div></div>
+        <button @click="pickOnMap" style="width:100%;padding:7px;border:1px dashed #16a34a;border-radius:5px;background:#f0fdf4;color:#16a34a;cursor:pointer;font-size:12px;margin-bottom:14px">👆 或点击地图获取坐标</button>
+        <div class="f-row"><div class="f-group"><label>运营商</label><input v-model="form.operator"></div><div class="f-group"><label>状态</label><select v-model="form.status"><option value="open">✅ 营业中</option><option value="closed">❌ 已关闭</option><option value="maintenance">🔧 维护中</option></select></div></div>
+        <div class="f-row"><div class="f-group"><label>营业时间</label><input v-model="form.openHours" placeholder="00:00-24:00"></div><div class="f-group"><label>电话</label><input v-model="form.phone"></div></div>
+        <div class="f-group"><label>备注</label><textarea v-model="form.desc" placeholder="备注信息"></textarea></div>
+      </div>
+      <div class="modal-foot">
+        <button @click="closeForm" style="padding:8px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer">取消</button>
+        <button @click="saveStation" :disabled="!form.name||saving" style="padding:8px 16px;background:#16a34a;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600">{{saving?'保存中...':'添加'}}</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" :class="toast.type==='err'?'toast-err':'toast-ok'" v-if="toast.text" style="top:68px">{{toast.text}}</div>
   </template>
 
@@ -403,13 +485,40 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <div class="header">
     <span class="logo">⚡ 充电服务</span>
     <span style="font-size:12px;color:#64748b">欢迎，{{currentUser?.username}}</span>
+    <button @click="syncSimToMapCenter" style="background:#dbeafe;color:#1e40af;border-color:#93c5fd;font-size:12px;font-weight:600">📍 模拟定位</button>
+    <button onclick="window._showNearby()" style="background:#16a34a;color:#fff;border-color:#16a34a;font-size:12px;font-weight:600">🔍 最近充电站</button>
     <span @click="openCardDetail" style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s" onmouseover="this.style.boxShadow='0 2px 8px rgba(245,158,11,.4)'" onmouseout="this.style.boxShadow='none'">⚡ 电费卡：{{currentUser?.electricityCards||0}}张</span>
     <span class="spacer"></span>
-    <button @click="showSessions=!showSessions">📋 我的充电 <span v-if="activeSessions.length" style="background:#16a34a;color:#fff;border-radius:50%;padding:1px 6px;font-size:11px;margin-left:4px">{{activeSessions.length}}</span></button>
+    <button @click="showSessions=!showSessions;showNearby=false">📋 我的充电 <span v-if="activeSessions.length" style="background:#16a34a;color:#fff;border-radius:50%;padding:1px 6px;font-size:11px;margin-left:4px">{{activeSessions.length}}</span></button>
     <button @click="doLogout" style="background:#f1f5f9">🚪 退出</button>
   </div>
   <div class="main">
-    <div class="sidebar" v-if="showSessions">
+    <!-- Nearby Stations Sidebar -->
+    <div class="sidebar" v-if="showNearby">
+      <div class="sidebar-toolbar">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>📍 附近充电站</strong>
+          <button @click="showNearby=false" style="border:none;background:none;cursor:pointer;font-size:16px;padding:2px 6px">✕</button>
+        </div>
+        <div style="font-size:11px;color:#64748b">按距离排序 · 共{{nearbyStations.length}}个</div>
+      </div>
+      <div class="sidebar-list">
+        <div v-if="nearbyStations.length===0" class="empty"><p>点击 🔍 最近充电站 查找</p></div>
+        <div v-for="ns in nearbyStations" :key="ns.id" @click="selectedNearby=ns" style="padding:10px;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s" :style="selectedNearby&&selectedNearby.id===ns.id?'background:#f0fdf4;border:1px solid #86efac':'background:#fff;border:1px solid #e2e8f0'">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <strong style="font-size:13px">{{ns.name}}</strong>
+            <span style="font-size:12px;font-weight:700;color:#2563eb;white-space:nowrap">{{ns._km}}km</span>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-top:3px">📍 {{ns.address||'未填写'}} | 🏢 {{ns.operator||'未知'}}</div>
+          <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;align-items:center">
+            <span class="badge" :class="ns.status==='open'?'badge-open':ns.status==='maintenance'?'badge-maint':'badge-closed'" style="font-size:10px">{{statusText(ns.status)}}</span>
+            <span style="font-size:10px;color:#64748b">🔌 {{(ns.piles||[]).filter(p=>p.status==='open').length}}/{{(ns.piles||[]).length}}桩空闲</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Sessions Sidebar -->
+    <div class="sidebar" v-if="showSessions&&!showNearby">
       <div class="sidebar-toolbar"><strong>📋 充电记录</strong><span style="font-size:12px;color:#64748b">{{sessions.length}}条</span></div>
       <div class="sidebar-list">
         <div v-if="sessions.length===0" class="empty"><p>暂无记录</p></div>
@@ -417,8 +526,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
           <div style="display:flex;justify-content:space-between"><strong>{{s.stationName}}</strong><span class="badge" :class="s.status==='active'?'badge-open':'badge-closed'">{{s.status==='active'?'充电中':'已完成'}}</span></div>
           <div style="color:#64748b;margin-top:4px">🔌 {{s.pileName}} | ⏱ {{s.duration}}h | 💰 ¥{{s.amount}}</div>
           <div style="color:#94a3b8;font-size:11px">{{s.startTime}}</div>
-          <button v-if="s.status==='active'" @click="stopSession(s.id)" style="margin-top:6px;padding:4px 12px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">停止充电</button>
+          <div v-if="s.status==='active'" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
+            <button @click="stopSession(s.id)" style="padding:4px 10px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⏹ 停止充电</button>
+            <button @click="reportIssue(s)" style="padding:4px 10px;background:#f59e0b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⚠ 异常上报</button>
+            <button @click="simulateComplete(s)" style="padding:4px 10px;background:#6366f1;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">✅ 模拟完成</button>
+          </div>
         </div>
+      </div>
+    </div>
+    <!-- Selected station detail panel -->
+    <div class="sidebar" v-if="showNearby&&selectedNearby" style="border-left:1px solid #e2e8f0;min-width:360px;width:360px">
+      <div class="sidebar-toolbar">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>{{selectedNearby.name}}</strong>
+          <span style="font-size:12px;font-weight:700;color:#2563eb">{{selectedNearby._km}}km</span>
+        </div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px">📍 {{selectedNearby.address||'未填写'}} · 🕐 {{selectedNearby.openHours||'00:00-24:00'}}</div>
+      </div>
+      <div class="sidebar-list">
+        <div style="font-size:12px;font-weight:600;margin-bottom:6px">🔌 充电桩（{{(selectedNearby.piles||[]).filter(p=>p.status==='open').length}}空闲）</div>
+        <div v-if="(selectedNearby.piles||[]).length===0" style="text-align:center;padding:16px;color:#94a3b8;font-size:12px">暂无充电桩</div>
+        <div v-for="p in selectedNearby.piles" :key="p.id" style="display:flex;align-items:center;gap:6px;padding:8px;background:#f8fafc;border-radius:6px;margin-bottom:4px;font-size:12px">
+          <span style="font-weight:600">{{p.name}}</span><span class="tag" style="font-size:10px">{{p.type}}</span>
+          <span style="color:#64748b;font-size:11px">{{p.power}}kW ¥{{p.price}}/度</span>
+          <span class="badge" :class="p.status==='open'?'badge-open':p.status==='in_use'?'badge-maint':'badge-closed'" style="font-size:10px">{{pileStatusText[p.status]}}</span>
+          <span style="flex:1"></span>
+          <button v-if="p.status==='open'" @click="openPayModal(selectedNearby,p)" style="padding:3px 10px;background:#16a34a;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⚡ 充电</button>
+        </div>
+        <button @click="navigateToStation(selectedNearby)" style="width:100%;padding:10px;margin-top:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px">🚗 导航到{{selectedNearby.name}}</button>
       </div>
     </div>
     <div class="map-wrap"><div id="map"></div></div>
@@ -426,7 +561,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <!-- Station Detail -->
   <div class="modal-mask" v-if="showStation" @click.self="showStation=false">
     <div class="modal">
-      <div class="modal-head"><h2>{{detailStation?.name}}</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showStation=false">✕</button></div>
+      <div class="modal-head"><h2>{{detailStation?.name}}</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showStation=false;stationPhotos=[]">✕</button></div>
       <div class="modal-body" v-if="detailStation">
         <p style="color:#64748b;margin-bottom:6px">📍 {{detailStation.address||'未填写'}} | 🏢 {{detailStation.operator||'未知'}}</p>
         <p style="color:#64748b;margin-bottom:12px">🕐 {{detailStation.openHours||'00:00-24:00'}}</p>
@@ -460,7 +595,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   </div>
   <!-- Payment -->
   <div class="modal-mask" v-if="showPay" @click.self="showPay=false">
-    <div class="modal modal-sm">
+    <div class="modal" style="width:460px">
       <div class="modal-head"><h2>💳 确认支付</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showPay=false">✕</button></div>
       <div class="modal-body" v-if="payTarget">
         <div style="background:#f0fdf4;padding:12px;border-radius:8px;margin-bottom:14px"><div style="font-size:14px;font-weight:600">{{payTarget.stationName}}</div><div style="color:#64748b">🔌 {{payTarget.pileName}} | {{payTarget.pilePrice}}元/度</div></div>
@@ -470,9 +605,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
             <span style="font-size:28px;font-weight:700;min-width:50px;text-align:center">{{payDur}}</span>
             <button @click="payDur=Math.min(24,payDur+1)" style="width:36px;height:36px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;cursor:pointer;font-size:18px">+</button>
             <span style="font-size:14px;color:#64748b">小时</span></div></div>
-        <div style="background:#f8fafc;padding:14px;border-radius:8px;text-align:center"><div style="font-size:13px;color:#64748b">应付金额</div><div style="font-size:32px;font-weight:700;color:#16a34a">¥{{(payTarget.pilePrice*payDur).toFixed(2)}}</div></div>
+        <!-- Total and card usage -->
+        <div style="background:#f8fafc;padding:14px;border-radius:8px;text-align:center;margin-bottom:14px">
+          <div style="font-size:13px;color:#64748b">应付金额</div>
+          <div style="font-size:32px;font-weight:700;color:#16a34a">¥{{payTotal.toFixed(2)}}</div>
+        </div>
+        <!-- Use electricity cards -->
+        <div v-if="payCards.length>0" style="border-top:2px solid #e2e8f0;padding-top:12px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between">
+            <span>⚡ 使用电费卡</span>
+            <span style="font-size:11px;color:#64748b;font-weight:400">已选 ¥{{payCardUsed.toFixed(2)}} / 共 ¥{{payCardsTotal.toFixed(2)}}</span>
+          </div>
+          <div v-for="c in payCards" :key="c.id" @click="togglePayCard(c)" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin-bottom:4px;border-radius:6px;cursor:pointer;transition:all .15s" :style="c._selected?'background:#fef3c7;border:1px solid #f59e0b':'background:#fff;border:1px solid #e2e8f0'">
+            <div style="display:flex;align-items:center;gap:6px">
+              <div :style="c._selected?'width:18px;height:18px;background:#f59e0b;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px':'width:18px;height:18px;border:2px solid #d1d5db;border-radius:4px'">{{c._selected?'✓':''}}</div>
+              <span style="font-size:13px;font-weight:600">¥{{c.amount.toFixed(2)}}</span>
+              <span style="font-size:10px;color:#94a3b8">{{c.stationName||'电费卡'}}</span>
+            </div>
+            <span v-if="c._selected" style="font-size:11px;color:#d97706">
+              {{payTotal>=payCardUsed?'全额使用':'退回 ¥'+(payCardUsed-payTotal).toFixed(2)}}
+            </span>
+          </div>
+          <div style="text-align:center;padding:8px;font-size:12px;color:#64748b">
+            {{payAfterCards>0?'还需支付 ¥'+payAfterCards.toFixed(2):'电费卡已抵扣全部费用！剩余 ¥'+(-payAfterCards).toFixed(2)+' 保留'}}
+          </div>
+        </div>
+        <div v-else style="text-align:center;padding:12px;color:#94a3b8;font-size:12px">暂无可用电费卡 · <a href="#" @click.prevent="showPay=false;openCardDetail()" style="color:#2563eb">查看我的电费卡</a></div>
       </div>
       <div class="modal-foot"><button @click="showPay=false" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer">取消</button><button @click="confirmPay" :disabled="paying" style="padding:10px 24px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">{{paying?'处理中...':'✅ 确认支付'}}</button></div>
+    </div>
+  </div>
+  <!-- Payment Result -->
+  <div class="modal-mask" v-if="showPayResult" @click.self="showPayResult=false">
+    <div class="modal modal-sm" style="text-align:center">
+      <div class="modal-body" style="padding:30px">
+        <div style="font-size:56px;margin-bottom:12px">✅</div>
+        <h2 style="color:#16a34a;margin-bottom:8px">支付成功！</h2>
+        <div style="background:#f0fdf4;padding:14px;border-radius:10px;margin-bottom:10px">
+          <div style="font-size:14px;font-weight:600">{{payResult.stationName}}</div>
+          <div style="font-size:12px;color:#64748b;margin-top:4px">🔌 {{payResult.pileName}} · {{payResult.duration}}小时</div>
+          <div style="font-size:12px;color:#64748b">💰 总费用 ¥{{payResult.totalPrice}} · ⚡ 电费卡抵扣 ¥{{payResult.cardUsed}}</div>
+          <div style="font-size:12px;color:#64748b" v-if="payResult.remainder>0">💳 剩余电费卡 ¥{{payResult.remainder}} 已保留</div>
+        </div>
+        <button @click="showPayResult=false" style="width:100%;padding:10px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">确 定</button>
+      </div>
     </div>
   </div>
   <!-- Card Detail Modal -->
@@ -535,6 +711,35 @@ function initMap(){
   L.control.layers({'高德地图':gd,'高德卫星':gs},null,{position:'topright'}).addTo(map)
   L.control.scale({metric:true,imperial:false,position:'bottomleft'}).addTo(map)
   markerLayer=L.layerGroup().addTo(map)
+  userLocLayer=L.layerGroup().addTo(map)
+  updateSimMarker() // show simulated location by default
+}
+
+let userLocLayer=null
+// Simulated location (Daqing city center)
+let simLat=46.5892,simLng=125.0036
+function updateSimMarker(){
+  if(!userLocLayer||!map)return
+  userLocLayer.clearLayers()
+  L.circle([simLat,simLng],{radius:200,color:'#3b82f6',fillColor:'#3b82f6',fillOpacity:0.1,weight:1}).addTo(userLocLayer)
+  L.circleMarker([simLat,simLng],{radius:9,color:'#fff',fillColor:'#3b82f6',fillOpacity:1,weight:3}).addTo(userLocLayer)
+  L.circleMarker([simLat,simLng],{radius:18,color:'#3b82f6',fillColor:'#3b82f6',fillOpacity:0.25,weight:1}).addTo(userLocLayer)
+}
+function syncSimToMapCenter(){
+  if(!map)return
+  const c=map.getCenter();simLat=c.lat;simLng=c.lng
+  updateSimMarker()
+  showToast('模拟位置已更新到地图中央')
+}
+function navigateToStation(s){
+  if(!s)return
+  const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  if(isMobile){
+    window.location.href='https://uri.amap.com/navigation?to='+s.longitude+','+s.latitude+','+encodeURIComponent(s.name)+'&mode=drive&callnative=1'
+  }else{
+    // Desktop: open Amap web direction page
+    window.open('https://ditu.amap.com/dir?to[lng]='+s.longitude+'&to[lat]='+s.latitude+'&to[name]='+encodeURIComponent(s.name)+'&type=car','_blank')
+  }
 }
 
 function refreshMarkers(stations,opts={}){
@@ -547,13 +752,16 @@ function refreshMarkers(stations,opts={}){
     const btns=opts.isAdmin
       ?'<button onclick="window._editStation(\''+s.id+'\')" style="margin-top:6px;padding:4px 12px;background:#16a34a;color:#fff;border:none;border-radius:4px;cursor:pointer;margin-right:4px">编辑</button><button onclick="window._delStation(\''+s.id+'\')" style="padding:4px 12px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer">删除</button>'
       :'<button onclick="window._userView(\''+s.id+'\')" style="margin-top:6px;padding:4px 12px;background:#16a34a;color:#fff;border:none;border-radius:4px;cursor:pointer">查看充电桩</button>'
-    m.bindPopup(L.popup().setContent('<div><b>'+esc(s.name)+'</b><br>📍 '+esc(s.address||'')+'<br>🔌 '+piles.length+'桩('+openCnt+'空闲)<br>'+pileTags+'<br>'+btns+'</div>'))
-    m.on('click',()=>{if(opts.onClick)opts.onClick(s)})
+    m.bindPopup(L.popup().setContent('<div><b>'+esc(s.name)+'</b><br>📍 '+esc(s.address||'')+'<br>🔌 '+piles.length+'桩('+openCnt+'空闲)<br>'+pileTags+'<br>'+btns+'</div>'),{closeOnClick:true})
+    m.on('click',()=>{
+      m.closePopup() // close popup immediately, use modal instead
+      if(opts.onClick)opts.onClick(s)
+    })
     markerLayer.addLayer(m)
   })
 }
 
-function flyTo(s){if(!map)return;map.flyTo([s.latitude,s.longitude],16,{duration:.8});markerLayer.eachLayer(m=>{const ll=m.getLatLng();if(ll.lat===s.latitude&&ll.lng===s.longitude)m.openPopup()})}
+function flyTo(s){if(!map)return;map.flyTo([s.latitude,s.longitude],16,{duration:.8})}
 
 const app=createApp({setup(){
   const view=ref('login'),currentUser=ref(null),token=ref('')
@@ -563,15 +771,23 @@ const app=createApp({setup(){
   const editingPile=ref(null),pileForm=ref({name:'',type:'快充',power:0,price:0,status:'open'})
   const showStation=ref(false),detailStation=ref(null)
   const showPay=ref(false),payTarget=ref(null),payDur=ref(1),paying=ref(false)
+  const payCards=ref([]),showPayResult=ref(false),payResult=ref({})
+  const payTotal=computed(()=>payTarget.value?payTarget.value.pilePrice*payDur.value:0)
+  const payCardsTotal=computed(()=>payCards.value.reduce((s,c)=>s+c.amount,0))
+  const payCardUsed=computed(()=>payCards.value.filter(c=>c._selected).reduce((s,c)=>s+c.amount,0))
+  const payAfterCards=computed(()=>payTotal.value-payCardUsed.value)
   const showSessions=ref(false),toast=ref({text:'',type:'ok'}),fileIn=ref(null)
   const showPileImport=ref(false),pileDragOver=ref(false),pileCoordLng=ref(''),pileCoordLat=ref(''),pileCoordList=ref([]),pileFileName=ref(''),pileFileIn=ref(null)
   const stationPhotos=ref([]),pendingPhotos=ref([]),showPhotoReview=ref(false),photoFileIn=ref(null),photoUploading=ref(false),currentPhotoStationId=ref('')
   const defaultCardCount=ref(1),defaultCardAmount=ref(10),reviewCardCounts=ref({}),reviewCardAmounts=ref({}),cardList=ref([]),showCards=ref(false)
   // Audit log, codes, send cards, batch
+  const showAdminDetail=ref(false),adminDetailStation=ref(null),adminStationPhotos=ref([]),adminEditing=ref(false)
+  const adminEditForm=ref({name:'',address:'',operator:'',status:'open',openHours:'00:00-24:00',phone:'',desc:'',piles:[]})
   const showAuditLog=ref(false),auditLog=ref([]),showCodeGen=ref(false),genCount=ref(10),genAmount=ref(10),genBusy=ref(false),genResult=ref([])
   const showSendCards=ref(false),sendUsername=ref(''),sendCount=ref(1),sendAmount=ref(10),sendBusy=ref(false)
   const showBatchIssue=ref(false),batchFileIn=ref(null)
   const redeemCode=ref(''),redeemBusy=ref(false)
+  const nearbyStations=ref([]),showNearby=ref(false),selectedNearby=ref(null)
   const pileStatusText={open:'空闲',in_use:'使用中',maintenance:'维护中',closed:'已停用'}
 
   const form=ref({name:'',address:'',longitude:0,latitude:0,operator:'',totalSpots:0,availableSpots:0,power:0,chargerTypes:[],price:0,openHours:'00:00-24:00',phone:'',status:'open',desc:'',piles:[]})
@@ -593,6 +809,7 @@ const app=createApp({setup(){
     return data
   }
 
+  function quickLogin(u,p){loginUser.value=u;loginPass.value=p;loginTab.value=u==='admin'?'admin':'user';loginMode.value='login';doLogin()}
   async function doLogin(){
     loginErr.value=''
     if(!loginUser.value||!loginPass.value){loginErr.value='请输入用户名和密码';return}
@@ -609,7 +826,7 @@ const app=createApp({setup(){
     }catch(e){loginErr.value=e.message}finally{loading.value=false}
   }
 
-  function doLogout(){view.value='login';currentUser.value=null;token.value='';loginUser.value='';loginPass.value='';loginErr.value='';stations.value=[];sessions.value=[];if(map){map.remove();map=null;markerLayer=null};showForm.value=false;showStation.value=false;showPay.value=false;showSessions.value=false}
+  function doLogout(){view.value='login';currentUser.value=null;token.value='';loginUser.value='';loginPass.value='';loginErr.value='';stations.value=[];sessions.value=[];nearbyStations.value=[];showNearby.value=false;if(map){map.remove();map=null;markerLayer=null;userLocLayer=null};showForm.value=false;showStation.value=false;showPay.value=false;showSessions.value=false}
 
   async function loadData(){
     if(view.value==='admin'||view.value==='user'){
@@ -623,7 +840,7 @@ const app=createApp({setup(){
     setTimeout(()=>{
       if(!document.getElementById('map'))return
       if(!map)initMap();else map.invalidateSize()
-      if(stations.value.length)refreshMarkers(stations.value,{isAdmin:view.value==='admin',onClick:s=>{if(view.value==='admin')selectedId.value=s.id;else{detailStation.value=s;showStation.value=true;loadStationPhotos(s.id)}}})
+      if(stations.value.length)refreshMarkers(stations.value,{isAdmin:view.value==='admin',onClick:s=>{if(view.value==='admin'){selectedId.value=s.id;adminDetailStation.value=s;showAdminDetail.value=true;loadAdminStationPhotos(s.id)}else{detailStation.value=s;showStation.value=true;loadStationPhotos(s.id)}}})
       if(map&&view.value==='admin')map.on('click',e=>{if(picking.value){form.value.latitude=e.latlng.lat;form.value.longitude=e.latlng.lng;picking.value=false;showForm.value=true;showToast('已获取坐标')}})
     },300)
   }
@@ -641,7 +858,25 @@ const app=createApp({setup(){
   function handlePileDrop(e){pileDragOver.value=false;const f=e.dataTransfer.files[0];if(f){pileFileName.value=f.name;showToast('文件已接收：'+f.name)}}
   function handlePileFile(e){const f=e.target.files[0];if(f){pileFileName.value=f.name;showToast('文件已选择：'+f.name)}}
   // ====== Photos ======
-  async function loadStationPhotos(sid){try{stationPhotos.value=await api('/api/stations/'+sid+'/photos')}catch(e){stationPhotos.value=[]}}
+  async function loadStationPhotos(sid){stationPhotos.value=[];try{stationPhotos.value=await api('/api/stations/'+sid+'/photos')}catch(e){stationPhotos.value=[]}}
+  async function loadAdminStationPhotos(sid){adminStationPhotos.value=[];try{adminStationPhotos.value=await api('/api/admin/stations/'+sid+'/photos')}catch(e){adminStationPhotos.value=[]}}
+  function closeAdminDetail(){showAdminDetail.value=false;adminStationPhotos.value=[];adminEditing.value=false}
+  function startAdminEdit(){adminEditForm.value=JSON.parse(JSON.stringify(adminDetailStation.value));adminEditing.value=true}
+  function cancelAdminEdit(){adminEditing.value=false}
+  async function saveAdminEdit(){
+    if(!adminEditForm.value.name)return;saving.value=true
+    try{await api('/api/stations/'+adminDetailStation.value.id,{method:'PUT',body:adminEditForm.value});await loadData();adminDetailStation.value=stations.value.find(s=>s.id===adminDetailStation.value.id);adminEditing.value=false;refreshMarkers(stations.value,{isAdmin:true,onClick:s=>{selectedId.value=s.id;adminDetailStation.value=s;showAdminDetail.value=true;loadAdminStationPhotos(s.id)}});showToast('已更新')}catch(e){showToast(e.message,'err')}finally{saving.value=false}
+  }
+  async function deleteAdminStation(){if(!confirm('确定删除该充电站？'))return;try{await api('/api/stations/'+adminDetailStation.value.id,{method:'DELETE'});await loadData();showAdminDetail.value=false;refreshMarkers(stations.value,{isAdmin:true,onClick:s=>{selectedId.value=s.id;adminDetailStation.value=s;showAdminDetail.value=true;loadAdminStationPhotos(s.id)}});showToast('已删除')}catch(e){showToast(e.message,'err')}}
+  function addPileToAdmin(){const p={id:'p'+Date.now().toString(36),...pileForm.value};adminEditForm.value.piles.push(p);pileForm.value={name:'',type:'快充',power:0,price:0,status:'open'}}
+  function removePileFromAdmin(id){adminEditForm.value.piles=adminEditForm.value.piles.filter(p=>p.id!==id)}
+  async function togglePhotoHide(ph){
+    try{const v=ph.visible===false;await api('/api/admin/photos/'+ph.id+'/visibility',{method:'PUT',body:{visible:v}});ph.visible=v;showToast(v?'照片已显示':'照片已隐藏')}catch(e){showToast(e.message,'err')}
+  }
+  async function revokePhotoCards(pid){
+    if(!confirm('追回该照片发放的全部有效电费卡？'))return
+    try{const res=await api('/api/admin/cards/revoke-by-photo/'+pid,{method:'PUT'});showToast(res.message)}catch(e){showToast(e.message,'err')}
+  }
   async function loadPendingPhotos(){try{pendingPhotos.value=await api('/api/admin/photos/pending');pendingPhotos.value.forEach(p=>{reviewCardCounts.value[p.id]=defaultCardCount.value;reviewCardAmounts.value[p.id]=defaultCardAmount.value})}catch(e){pendingPhotos.value=[]}}
   function triggerPhotoUpload(station){currentPhotoStationId.value=station.id;photoFileIn.value.click()}
   async function handlePhotoUpload(e){
@@ -686,7 +921,7 @@ const app=createApp({setup(){
   // ====== Redeem ======
   async function doRedeem(){if(!redeemCode.value){showToast('请输入兑换码','err');return};redeemBusy.value=true;try{const res=await api('/api/user/redeem',{method:'POST',body:{code:redeemCode.value}});showToast(res.message);redeemCode.value='';openCardDetail()}catch(e){showToast(e.message,'err')}finally{redeemBusy.value=false}}
   async function deleteRevokedCard(cid){if(!confirm('确认删除该卡片？'))return;try{await api('/api/user/cards/'+cid,{method:'DELETE'});showToast('已删除');openCardDetail()}catch(e){showToast(e.message,'err')}}
-  function selectStation(s){selectedId.value=s.id;flyTo(s)}
+  function selectStation(s){selectedId.value=s.id;flyTo(s);if(view.value==='admin'){adminDetailStation.value=s;showAdminDetail.value=true;loadAdminStationPhotos(s.id)}}
 
   async function saveStation(){
     if(!form.value.name)return;saving.value=true
@@ -703,11 +938,11 @@ const app=createApp({setup(){
 
   window._editStation=async function(id){
     const s=stations.value.find(x=>x.id===id);if(!s)return
-    editingId.value=id;editingPile.value=null;form.value=JSON.parse(JSON.stringify(s));showForm.value=true
+    adminDetailStation.value=s;showAdminDetail.value=true;loadAdminStationPhotos(id);startAdminEdit()
   }
   window._delStation=async function(id){
-    if(!confirm('确定删除？'))return
-    try{await api('/api/stations/'+id,{method:'DELETE'});await loadData();refreshMarkers(stations.value,{isAdmin:true,onClick:s=>{selectedId.value=s.id}});showToast('已删除')}catch(e){showToast(e.message,'err')}
+    const s=stations.value.find(x=>x.id===id);if(!s)return
+    adminDetailStation.value=s;deleteAdminStation()
   }
 
   function addPile(){const p={id:'p'+Date.now().toString(36),...pileForm.value};form.value.piles.push(p);pileForm.value={name:'',type:'快充',power:0,price:0,status:'open'}}
@@ -724,20 +959,48 @@ const app=createApp({setup(){
   }
 
   window._userView=function(id){const s=stations.value.find(x=>x.id===id);if(s){detailStation.value=s;showStation.value=true;loadStationPhotos(id)}}
-  function openPayModal(s,p){payTarget.value={stationId:s.id,stationName:s.name,pileId:p.id,pileName:p.name,pilePrice:p.price};payDur.value=1;showPay.value=true}
+  async function openPayModal(s,p){
+    payTarget.value={stationId:s.id,stationName:s.name,pileId:p.id,pileName:p.name,pilePrice:p.price};payDur.value=1;showPay.value=true
+    try{var res=await api('/api/user/cards');payCards.value=(res.cards||[]).filter(function(c){return c.status==='active'}).map(function(c){c._selected=false;return c});if(payCards.value.length>0)payCards.value[0]._selected=true}catch(e){payCards.value=[]}
+  }
+  function togglePayCard(c){c._selected=!c._selected}
   async function confirmPay(){
     if(!payTarget.value)return;paying.value=true
-    try{await api('/api/sessions',{method:'POST',body:{station_id:payTarget.value.stationId,pile_id:payTarget.value.pileId,duration:payDur.value,amount:+(payTarget.value.pilePrice*payDur.value).toFixed(2)}});showPay.value=false;payTarget.value=null;await loadData();sessions.value=await api('/api/sessions');refreshMarkers(stations.value,{isAdmin:false,onClick:s=>{detailStation.value=s;showStation.value=true}});showToast('支付成功！充电桩已激活')}catch(e){showToast(e.message,'err')}finally{paying.value=false}
+    try{
+      var total=payTotal.value,cardUsed=payCardUsed.value
+      // Apply cards: deduct from total, remainder stays on card
+      var actualPay=Math.max(0,total-cardUsed)
+      await api('/api/sessions',{method:'POST',body:{station_id:payTarget.value.stationId,pile_id:payTarget.value.pileId,duration:payDur.value,amount:actualPay}})
+      showPay.value=false
+      payResult.value={stationName:payTarget.value.stationName,pileName:payTarget.value.pileName,duration:payDur.value,totalPrice:total.toFixed(2),cardUsed:Math.min(cardUsed,total).toFixed(2),remainder:cardUsed>total?(cardUsed-total).toFixed(2):'0.00'}
+      showPayResult.value=true;payTarget.value=null
+      await loadData();sessions.value=await api('/api/sessions')
+      refreshMarkers(stations.value,{isAdmin:false,onClick:s=>{detailStation.value=s;showStation.value=true}})
+    }catch(e){showToast(e.message,'err')}finally{paying.value=false}
   }
   async function stopSession(sid){try{await api('/api/sessions/'+sid+'/stop',{method:'PUT'});await loadData();sessions.value=await api('/api/sessions');refreshMarkers(stations.value,{isAdmin:false,onClick:s=>{detailStation.value=s;showStation.value=true}});showToast('充电已停止')}catch(e){showToast(e.message,'err')}}
+  function reportIssue(s){var txt=prompt('请输入异常描述：',s.stationName+' - '+s.pileName+' 出现异常');if(txt){showToast('异常已上报：'+txt);stopSession(s.id)}}
+  function simulateComplete(s){if(confirm('模拟充电完成？将自动停止该充电记录。')){stopSession(s.id);setTimeout(function(){showToast('充电已完成（模拟）')},500)}}
 
   const statusText=s=>({open:'营业中',closed:'已关闭',maintenance:'维护中'}[s]||'未知')
   function showToast(msg,type='ok'){toast.value={text:msg,type};setTimeout(()=>toast.value={text:'',type:'ok'},2500)}
 
+  function doFindNearest(){
+    nearbyStations.value=[]
+    if(!stations.value||!stations.value.length){showToast('暂无充电站数据','err');return}
+    var list=stations.value.map(function(s){
+      var d=(map&&map.distance)?map.distance([simLat,simLng],[s.latitude,s.longitude]):0
+      return Object.assign({},s,{_distance:d,_km:(d/1000).toFixed(1)})
+    }).sort(function(a,b){return a._distance-b._distance})
+    nearbyStations.value=list
+    selectedNearby.value=list[0]
+    showNearby.value=true
+  }
+  window._showNearby=function(){showNearby.value=true;doFindNearest()}
   onMounted(()=>{})
-  onUnmounted(()=>{if(map){map.remove();map=null};delete window._editStation;delete window._delStation;delete window._userView})
+  onUnmounted(()=>{if(map){map.remove();map=null};delete window._editStation;delete window._delStation;delete window._userView;delete window._showNearby})
 
-  return{view,currentUser,loginTab,loginMode,loginUser,loginPass,loginPhone,loginErr,loading,doLogin,doLogout,stations,sessions,search,filterStatus,selectedId,filtered,activeSessions,showForm,editingId,picking,saving,form,editingPile,pileForm,showStation,detailStation,showPay,payTarget,payDur,paying,showSessions,toast,fileIn,showPileImport,pileDragOver,pileCoordLng,pileCoordLat,pileCoordList,pileFileName,pileFileIn,stationPhotos,pendingPhotos,showPhotoReview,photoFileIn,photoUploading,currentPhotoStationId,defaultCardCount,defaultCardAmount,reviewCardCounts,reviewCardAmounts,cardList,showCards,showAuditLog,auditLog,showCodeGen,genCount,genAmount,genBusy,genResult,showSendCards,sendUsername,sendCount,sendAmount,sendBusy,showBatchIssue,batchFileIn,redeemCode,redeemBusy,pileStatusText,statusText,openAddForm,pickOnMap,closeForm,openPileImport,closePileImport,addCoordToList,triggerPileFile,handlePileDrop,handlePileFile,loadStationPhotos,triggerPhotoUpload,handlePhotoUpload,openPhotoReview,closePhotoReview,approvePhoto,rejectPhoto,saveCardDefaults,openCardDetail,openAuditLog,revokeByPhoto,revokeCard,openCodeGen,generateCodes,openSendCards,doSendCards,openBatchIssue,triggerBatchFile,handleBatchFile,doBatchIssue,doRedeem,deleteRevokedCard,selectStation,saveStation,adminExport,triggerImport,adminImport,addPile,startEditPile,saveEditPile,cancelEditPile,removePile,openPayModal,confirmPay,stopSession}
+  return{view,currentUser,loginTab,loginMode,loginUser,loginPass,loginPhone,loginErr,loading,quickLogin,doLogin,doLogout,stations,sessions,search,filterStatus,selectedId,filtered,activeSessions,showForm,editingId,picking,saving,form,editingPile,pileForm,showStation,detailStation,showPay,payTarget,payDur,paying,payCards,payTotal,payCardsTotal,payCardUsed,payAfterCards,showPayResult,payResult,showSessions,toast,fileIn,showPileImport,pileDragOver,pileCoordLng,pileCoordLat,pileCoordList,pileFileName,pileFileIn,stationPhotos,pendingPhotos,showPhotoReview,photoFileIn,photoUploading,currentPhotoStationId,defaultCardCount,defaultCardAmount,reviewCardCounts,reviewCardAmounts,cardList,showCards,showAdminDetail,adminDetailStation,adminStationPhotos,adminEditing,adminEditForm,showAuditLog,auditLog,showCodeGen,genCount,genAmount,genBusy,genResult,showSendCards,sendUsername,sendCount,sendAmount,sendBusy,showBatchIssue,batchFileIn,redeemCode,redeemBusy,nearbyStations,showNearby,selectedNearby,syncSimToMapCenter,doFindNearest,navigateToStation,pileStatusText,statusText,openAddForm,pickOnMap,closeForm,openPileImport,closePileImport,addCoordToList,triggerPileFile,handlePileDrop,handlePileFile,loadStationPhotos,loadAdminStationPhotos,closeAdminDetail,startAdminEdit,cancelAdminEdit,saveAdminEdit,deleteAdminStation,addPileToAdmin,removePileFromAdmin,togglePhotoHide,revokePhotoCards,triggerPhotoUpload,handlePhotoUpload,openPhotoReview,closePhotoReview,approvePhoto,rejectPhoto,saveCardDefaults,openCardDetail,openAuditLog,revokeByPhoto,revokeCard,openCodeGen,generateCodes,openSendCards,doSendCards,openBatchIssue,triggerBatchFile,handleBatchFile,doBatchIssue,doRedeem,deleteRevokedCard,selectStation,saveStation,adminExport,triggerImport,adminImport,addPile,startEditPile,saveEditPile,cancelEditPile,removePile,openPayModal,confirmPay,stopSession,reportIssue,simulateComplete}
 }})
 app.mount('#app')
 </script>

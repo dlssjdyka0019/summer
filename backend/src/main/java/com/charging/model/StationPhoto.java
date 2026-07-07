@@ -30,7 +30,10 @@ public class StationPhoto {
     private String originalName;
 
     @Column(length = 20)
-    private String status = "pending"; // pending / approved / rejected
+    private String status = "pending"; // pending / approved / rejected / hidden
+
+    @Column(nullable = false)
+    private Boolean visible = true;
 
     @Column(name = "card_count")
     private Integer cardCount = 1;  // how many cards rewarded
@@ -59,6 +62,8 @@ public class StationPhoto {
     public void setOriginalName(String originalName) { this.originalName = originalName; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public Boolean getVisible() { return visible; }
+    public void setVisible(Boolean visible) { this.visible = visible; }
     public Integer getCardCount() { return cardCount; }
     public void setCardCount(Integer cardCount) { this.cardCount = cardCount; }
     public Double getCardAmount() { return cardAmount; }

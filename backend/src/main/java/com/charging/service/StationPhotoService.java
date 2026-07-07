@@ -68,10 +68,24 @@ public class StationPhotoService {
         return Map.of("ok", true, "id", photoId, "message", "照片已上传，等待管理员审核");
     }
 
-    /** Get approved photos for a station */
+    /** Get approved photos for a station (visible only for users) */
     public List<Map<String, Object>> getApprovedPhotos(String stationId) {
+        return photoRepo.findByStationIdAndStatusAndVisibleTrueOrderByCreatedAtDesc(stationId, "approved")
+                .stream().map(this::toMap).collect(Collectors.toList());
+    }
+
+    /** Get ALL approved photos for a station (admin view, includes hidden) */
+    public List<Map<String, Object>> getAllApprovedPhotos(String stationId) {
         return photoRepo.findByStationIdAndStatusOrderByCreatedAtDesc(stationId, "approved")
                 .stream().map(this::toMap).collect(Collectors.toList());
+    }
+
+    /** Toggle photo visibility */
+    public Map<String, Object> togglePhotoVisibility(String photoId, boolean visible) {
+        StationPhoto p = photoRepo.findById(photoId).orElseThrow(() -> new RuntimeException("照片不存在"));
+        p.setVisible(visible);
+        photoRepo.save(p);
+        return Map.of("ok", true, "visible", visible, "message", visible ? "照片已显示" : "照片已隐藏");
     }
 
     /** Get pending photos for admin review, with hints */
@@ -191,6 +205,7 @@ public class StationPhotoService {
         m.put("createdAt", p.getCreatedAt());
         m.put("cardCount", p.getCardCount());
         m.put("cardAmount", p.getCardAmount());
+        m.put("visible", p.getVisible());
         return m;
     }
 
