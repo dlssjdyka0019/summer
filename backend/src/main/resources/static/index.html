@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>充电站管理</title>
+<title>充电服务</title>
 <link rel="stylesheet" href="/leaflet.min.css">
 <script src="/vue.min.js"></script>
 <script src="/leaflet.min.js"></script>
@@ -150,8 +150,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
     <span style="font-size:12px;color:#64748b">管理员：{{currentUser?.username}}</span>
     <span class="spacer"></span>
     <button @click="syncSimToMapCenter" style="background:#dbeafe;color:#1e40af;border-color:#93c5fd;font-weight:600">📍 模拟定位</button>
-    <button @click="adminExport">📥 导出</button>
-    <button @click="triggerImport">📤 导入</button>
     <button class="btn-import-pile" @click="openPileImport">📌 导入充电桩</button>
     <button class="btn-photo-review" @click="openPhotoReview">🖼️ 照片审核 <span v-if="pendingPhotos.length" style="background:#dc2626;color:#fff;border-radius:50%;padding:1px 6px;font-size:11px;margin-left:4px">{{pendingPhotos.length}}</span></button>
     <button @click="openAuditLog">📋 审核记录</button>
@@ -527,9 +525,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
           <div style="color:#64748b;margin-top:4px">🔌 {{s.pileName}} | ⏱ {{s.duration}}h | 💰 ¥{{s.amount}}</div>
           <div style="color:#94a3b8;font-size:11px">{{s.startTime}}</div>
           <div v-if="s.status==='active'" style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap">
-            <button @click="stopSession(s.id)" style="padding:4px 10px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⏹ 停止充电</button>
-            <button @click="reportIssue(s)" style="padding:4px 10px;background:#f59e0b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⚠ 异常上报</button>
-            <button @click="simulateComplete(s)" style="padding:4px 10px;background:#6366f1;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">✅ 模拟完成</button>
+            <button @click="openActionModal('stop',s)" style="padding:4px 10px;background:#dc2626;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⏹ 停止充电</button>
+            <button @click="openActionModal('report',s)" style="padding:4px 10px;background:#f59e0b;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">⚠ 异常上报</button>
+            <button @click="openActionModal('complete',s)" style="padding:4px 10px;background:#6366f1;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">✅ 模拟完成</button>
           </div>
         </div>
       </div>
@@ -596,7 +594,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
   <!-- Payment -->
   <div class="modal-mask" v-if="showPay" @click.self="showPay=false">
     <div class="modal" style="width:460px">
-      <div class="modal-head"><h2>💳 确认支付</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showPay=false">✕</button></div>
+      <div class="modal-head"><h2>⚡ 开始充电</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showPay=false">✕</button></div>
       <div class="modal-body" v-if="payTarget">
         <div style="background:#f0fdf4;padding:12px;border-radius:8px;margin-bottom:14px"><div style="font-size:14px;font-weight:600">{{payTarget.stationName}}</div><div style="color:#64748b">🔌 {{payTarget.pileName}} | {{payTarget.pilePrice}}元/度</div></div>
         <div style="text-align:center;margin-bottom:16px"><label style="font-size:13px;color:#64748b">充电时长</label>
@@ -632,7 +630,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
         </div>
         <div v-else style="text-align:center;padding:12px;color:#94a3b8;font-size:12px">暂无可用电费卡 · <a href="#" @click.prevent="showPay=false;openCardDetail()" style="color:#2563eb">查看我的电费卡</a></div>
       </div>
-      <div class="modal-foot"><button @click="showPay=false" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer">取消</button><button @click="confirmPay" :disabled="paying" style="padding:10px 24px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">{{paying?'处理中...':'✅ 确认支付'}}</button></div>
+      <div class="modal-foot"><button @click="showPay=false" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer">取消</button><button @click="confirmPay" :disabled="paying" style="padding:10px 24px;background:#16a34a;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">{{paying?'处理中...':'🔌 我已链接充电桩，开始充电'}}</button></div>
     </div>
   </div>
   <!-- Payment Result -->
@@ -651,6 +649,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei
       </div>
     </div>
   </div>
+  <!-- Action Confirm Modal -->
+  <div class="modal-mask" v-if="showAction" @click.self="showAction=false">
+    <div class="modal modal-sm">
+      <div class="modal-head"><h2>{{actionTitle}}</h2><button style="border:none;background:none;cursor:pointer;font-size:18px" @click="showAction=false">✕</button></div>
+      <div class="modal-body">
+        <div style="text-align:center;margin-bottom:16px">
+          <div style="font-size:40px;margin-bottom:10px">{{actionIcon}}</div>
+          <div style="font-size:14px;color:#374151;font-weight:600">{{actionMsg}}</div>
+          <div v-if="actionStation" style="font-size:12px;color:#64748b;margin-top:6px;background:#f8fafc;padding:8px 12px;border-radius:8px">
+            🔌 {{actionStation.pileName}} · {{actionStation.stationName}}<br>⏱ {{actionStation.duration}}h · 💰 ¥{{actionStation.amount}}
+          </div>
+        </div>
+        <div v-if="actionType==='report'" class="f-group">
+          <label>异常描述</label>
+          <textarea v-model="actionExtra" placeholder="请描述异常情况..." style="width:100%;min-height:60px"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button @click="showAction=false" style="padding:10px 20px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;cursor:pointer">取消</button>
+        <button @click="doActionConfirm" :disabled="actionBusy" :style="'padding:10px 24px;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;background:'+actionColor">{{actionBusy?'处理中...':actionBtn}}</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Card Detail Modal -->
   <div class="modal-mask" v-if="showCards" @click.self="showCards=false">
     <div class="modal" style="width:480px">
@@ -734,11 +756,12 @@ function syncSimToMapCenter(){
 function navigateToStation(s){
   if(!s)return
   const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  var from='from='+simLng+','+simLat+','+encodeURIComponent('我的位置')
   if(isMobile){
-    window.location.href='https://uri.amap.com/navigation?to='+s.longitude+','+s.latitude+','+encodeURIComponent(s.name)+'&mode=drive&callnative=1'
+    window.location.href='https://uri.amap.com/navigation?'+from+'&to='+s.longitude+','+s.latitude+','+encodeURIComponent(s.name)+'&mode=drive&callnative=1'
   }else{
     // Desktop: open Amap web direction page
-    window.open('https://ditu.amap.com/dir?to[lng]='+s.longitude+'&to[lat]='+s.latitude+'&to[name]='+encodeURIComponent(s.name)+'&type=car','_blank')
+    window.open('https://ditu.amap.com/dir?from[lng]='+simLng+'&from[lat]='+simLat+'&from[name]='+encodeURIComponent('我的位置')+'&to[lng]='+s.longitude+'&to[lat]='+s.latitude+'&to[name]='+encodeURIComponent(s.name)+'&type=car','_blank')
   }
 }
 
@@ -787,6 +810,7 @@ const app=createApp({setup(){
   const showSendCards=ref(false),sendUsername=ref(''),sendCount=ref(1),sendAmount=ref(10),sendBusy=ref(false)
   const showBatchIssue=ref(false),batchFileIn=ref(null)
   const redeemCode=ref(''),redeemBusy=ref(false)
+  const showAction=ref(false),actionType=ref(''),actionStation=ref(null),actionTitle=ref(''),actionMsg=ref(''),actionIcon=ref(''),actionColor=ref('#16a34a'),actionBtn=ref('确认'),actionBusy=ref(false),actionExtra=ref('')
   const nearbyStations=ref([]),showNearby=ref(false),selectedNearby=ref(null)
   const pileStatusText={open:'空闲',in_use:'使用中',maintenance:'维护中',closed:'已停用'}
 
@@ -978,6 +1002,31 @@ const app=createApp({setup(){
       refreshMarkers(stations.value,{isAdmin:false,onClick:s=>{detailStation.value=s;showStation.value=true}})
     }catch(e){showToast(e.message,'err')}finally{paying.value=false}
   }
+  function openActionModal(type,s){
+    actionType.value=type;actionStation.value=s;actionExtra.value='';actionBusy.value=false
+    if(type==='stop'){
+      actionTitle.value='⏹ 停止充电';actionMsg.value='确认停止该充电记录？';actionIcon.value='⏹';actionColor.value='#dc2626';actionBtn.value='确认停止'
+    }else if(type==='report'){
+      actionTitle.value='⚠ 异常上报';actionMsg.value='请描述异常情况，提交后将自动停止充电';actionIcon.value='⚠';actionColor.value='#d97706';actionBtn.value='提交上报'
+    }else if(type==='complete'){
+      actionTitle.value='✅ 模拟充电完成';actionMsg.value='确认标记该充电记录为已完成？';actionIcon.value='✅';actionColor.value='#6366f1';actionBtn.value='确认完成'
+    }
+    showAction.value=true
+  }
+  async function doActionConfirm(){
+    actionBusy.value=true
+    try{
+      var sid=actionStation.value.id
+      if(actionType.value==='report'){
+        showToast('异常已上报：'+(actionExtra.value||actionStation.value.stationName+' 异常'))
+      }
+      await api('/api/sessions/'+sid+'/stop',{method:'PUT'})
+      await loadData();sessions.value=await api('/api/sessions')
+      refreshMarkers(stations.value,{isAdmin:false,onClick:s=>{detailStation.value=s;showStation.value=true}})
+      showToast(actionType.value==='complete'?'充电已完成（模拟）':'充电已停止')
+      showAction.value=false
+    }catch(e){showToast(e.message,'err')}finally{actionBusy.value=false}
+  }
   async function stopSession(sid){try{await api('/api/sessions/'+sid+'/stop',{method:'PUT'});await loadData();sessions.value=await api('/api/sessions');refreshMarkers(stations.value,{isAdmin:false,onClick:s=>{detailStation.value=s;showStation.value=true}});showToast('充电已停止')}catch(e){showToast(e.message,'err')}}
   function reportIssue(s){var txt=prompt('请输入异常描述：',s.stationName+' - '+s.pileName+' 出现异常');if(txt){showToast('异常已上报：'+txt);stopSession(s.id)}}
   function simulateComplete(s){if(confirm('模拟充电完成？将自动停止该充电记录。')){stopSession(s.id);setTimeout(function(){showToast('充电已完成（模拟）')},500)}}
@@ -991,7 +1040,7 @@ const app=createApp({setup(){
     var list=stations.value.map(function(s){
       var d=(map&&map.distance)?map.distance([simLat,simLng],[s.latitude,s.longitude]):0
       return Object.assign({},s,{_distance:d,_km:(d/1000).toFixed(1)})
-    }).sort(function(a,b){return a._distance-b._distance})
+    }).sort(function(a,b){var sa=a.status==='open'?0:1;var sb=b.status==='open'?0:1;if(sa!==sb)return sa-sb;return a._distance-b._distance})
     nearbyStations.value=list
     selectedNearby.value=list[0]
     showNearby.value=true
@@ -1000,7 +1049,7 @@ const app=createApp({setup(){
   onMounted(()=>{})
   onUnmounted(()=>{if(map){map.remove();map=null};delete window._editStation;delete window._delStation;delete window._userView;delete window._showNearby})
 
-  return{view,currentUser,loginTab,loginMode,loginUser,loginPass,loginPhone,loginErr,loading,quickLogin,doLogin,doLogout,stations,sessions,search,filterStatus,selectedId,filtered,activeSessions,showForm,editingId,picking,saving,form,editingPile,pileForm,showStation,detailStation,showPay,payTarget,payDur,paying,payCards,payTotal,payCardsTotal,payCardUsed,payAfterCards,showPayResult,payResult,showSessions,toast,fileIn,showPileImport,pileDragOver,pileCoordLng,pileCoordLat,pileCoordList,pileFileName,pileFileIn,stationPhotos,pendingPhotos,showPhotoReview,photoFileIn,photoUploading,currentPhotoStationId,defaultCardCount,defaultCardAmount,reviewCardCounts,reviewCardAmounts,cardList,showCards,showAdminDetail,adminDetailStation,adminStationPhotos,adminEditing,adminEditForm,showAuditLog,auditLog,showCodeGen,genCount,genAmount,genBusy,genResult,showSendCards,sendUsername,sendCount,sendAmount,sendBusy,showBatchIssue,batchFileIn,redeemCode,redeemBusy,nearbyStations,showNearby,selectedNearby,syncSimToMapCenter,doFindNearest,navigateToStation,pileStatusText,statusText,openAddForm,pickOnMap,closeForm,openPileImport,closePileImport,addCoordToList,triggerPileFile,handlePileDrop,handlePileFile,loadStationPhotos,loadAdminStationPhotos,closeAdminDetail,startAdminEdit,cancelAdminEdit,saveAdminEdit,deleteAdminStation,addPileToAdmin,removePileFromAdmin,togglePhotoHide,revokePhotoCards,triggerPhotoUpload,handlePhotoUpload,openPhotoReview,closePhotoReview,approvePhoto,rejectPhoto,saveCardDefaults,openCardDetail,openAuditLog,revokeByPhoto,revokeCard,openCodeGen,generateCodes,openSendCards,doSendCards,openBatchIssue,triggerBatchFile,handleBatchFile,doBatchIssue,doRedeem,deleteRevokedCard,selectStation,saveStation,adminExport,triggerImport,adminImport,addPile,startEditPile,saveEditPile,cancelEditPile,removePile,openPayModal,confirmPay,stopSession,reportIssue,simulateComplete}
+  return{view,currentUser,loginTab,loginMode,loginUser,loginPass,loginPhone,loginErr,loading,quickLogin,doLogin,doLogout,stations,sessions,search,filterStatus,selectedId,filtered,activeSessions,showForm,editingId,picking,saving,form,editingPile,pileForm,showStation,detailStation,showPay,payTarget,payDur,paying,payCards,payTotal,payCardsTotal,payCardUsed,payAfterCards,showPayResult,payResult,showSessions,toast,fileIn,showPileImport,pileDragOver,pileCoordLng,pileCoordLat,pileCoordList,pileFileName,pileFileIn,stationPhotos,pendingPhotos,showPhotoReview,photoFileIn,photoUploading,currentPhotoStationId,defaultCardCount,defaultCardAmount,reviewCardCounts,reviewCardAmounts,cardList,showCards,showAdminDetail,adminDetailStation,adminStationPhotos,adminEditing,adminEditForm,showAuditLog,auditLog,showCodeGen,genCount,genAmount,genBusy,genResult,showSendCards,sendUsername,sendCount,sendAmount,sendBusy,showBatchIssue,batchFileIn,redeemCode,redeemBusy,nearbyStations,showNearby,selectedNearby,syncSimToMapCenter,doFindNearest,navigateToStation,pileStatusText,statusText,openAddForm,pickOnMap,closeForm,openPileImport,closePileImport,addCoordToList,triggerPileFile,handlePileDrop,handlePileFile,loadStationPhotos,loadAdminStationPhotos,closeAdminDetail,startAdminEdit,cancelAdminEdit,saveAdminEdit,deleteAdminStation,addPileToAdmin,removePileFromAdmin,togglePhotoHide,revokePhotoCards,triggerPhotoUpload,handlePhotoUpload,openPhotoReview,closePhotoReview,approvePhoto,rejectPhoto,saveCardDefaults,openCardDetail,openAuditLog,revokeByPhoto,revokeCard,openCodeGen,generateCodes,openSendCards,doSendCards,openBatchIssue,triggerBatchFile,handleBatchFile,doBatchIssue,doRedeem,deleteRevokedCard,selectStation,saveStation,adminExport,triggerImport,adminImport,addPile,startEditPile,saveEditPile,cancelEditPile,removePile,openPayModal,confirmPay,stopSession,reportIssue,simulateComplete,showAction,actionType,actionStation,actionTitle,actionMsg,actionIcon,actionColor,actionBtn,actionBusy,actionExtra,openActionModal,doActionConfirm}
 }})
 app.mount('#app')
 </script>
